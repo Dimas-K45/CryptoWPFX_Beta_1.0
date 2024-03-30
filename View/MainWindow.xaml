@@ -48,8 +48,8 @@
                     </Grid.RowDefinitions>
 
                     <!--Поиск монеты-->
-                    <Border Grid.Row="0" HorizontalAlignment="Left" CornerRadius="10" Width="800" Height="40"  BorderBrush="DarkBlue" BorderThickness="2">
-                        <TextBox TextChanged="coinInput_TextChanged" Padding="5,5,5,0" x:Name="coinInput" VerticalAlignment="Center" HorizontalAlignment="Center"  FontSize="18" Width="800" Height="40" Foreground="#fff" BorderThickness="0" Background="Transparent" />
+                    <Border Grid.Row="0" HorizontalAlignment="Center" CornerRadius="10" Width="900" Height="45" BorderBrush="DarkBlue" BorderThickness="2">
+                        <TextBox TextChanged="coinInput_TextChanged" Padding="8,8,8,5" x:Name="coinInput" CaretBrush="White" VerticalAlignment="Center" HorizontalAlignment="Center"  FontSize="18" Width="900" Height="40" Foreground="#fff" BorderThickness="0" Background="Transparent" />
                     </Border>
 
                     <Border x:Name="borderHeaderDataGrid" Background="#192038" Padding="16,10,5,10" Margin="0,155,0,0" CornerRadius="10">

@@ -13,6 +13,7 @@
     <PackageReference Include="CoinGeckoAPI" Version="3.0.2.3" />
     <PackageReference Include="CoinGeckoAsyncApi" Version="1.7.0" />
     <PackageReference Include="FontAwesome.WPF" Version="4.7.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.3" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="RestSharp" Version="110.2.0" />
     <PackageReference Include="SciChart" Version="8.3.0.28019" />
