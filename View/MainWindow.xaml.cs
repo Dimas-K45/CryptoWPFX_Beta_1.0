@@ -25,9 +25,13 @@ namespace CryptoWPFX
         string TokenActiveID = "";
         private CoinGeckoApi coinGeckoAPI = new CoinGeckoApi();
         private List<CryptoCurrency> topCurrencies = new List<CryptoCurrency>();
+        public CryptoCurrency CryptoCurrency { get; private set; }
+        ApplicationContext db = new ApplicationContext();
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = CryptoCurrency;
+            Loaded += Window_Loaded;
         }
         static string InsertSeparator(string input, char separator)
         {
@@ -104,6 +108,16 @@ namespace CryptoWPFX
 
                 // Привязываем список к DataGrid
                 DataGrid.ItemsSource = topCurrencies;
+                db.Database.EnsureCreated();
+                foreach (var currency in topCurrencies)
+                {
+                    if (!db.CryptoCoin.Any(c => c.Id == currency.Id))
+                    {
+                        db.CryptoCoin.Add(currency);
+                    }
+                }
+                db.SaveChanges();
+
             }
             catch (Exception ex)
             {
