@@ -1,6 +1,7 @@
 ﻿using CryptoWPFX.Model;
 using CryptoWPFX.Model.API;
 using SciChart.Charting.Model.DataSeries;
+using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
 using System.Text.Json;
@@ -25,6 +26,8 @@ namespace CryptoWPFX
         string TokenActiveID = "";
         private CoinGeckoApi coinGeckoAPI = new CoinGeckoApi();
         private List<CryptoCurrency> topCurrencies = new List<CryptoCurrency>();
+
+        JsonElement ConvertCurrencyToken;
         public MainWindow()
         {
             InitializeComponent();
@@ -51,6 +54,8 @@ namespace CryptoWPFX
 
             return result;
         }
+
+        // метод для аббривеатуры цифр (1M, 1B, 1T)
         static string AbbreviateNumber(string input)
         {
             if (string.IsNullOrEmpty(input))
@@ -74,15 +79,19 @@ namespace CryptoWPFX
             return number.ToString();
         }
 
+        // обработчик кнопки увеличения и уменьшения окна
         private void FullScreenButton_Click(object sender, RoutedEventArgs e)
         {
             FullScreenState();
         }
 
+        // обработчик закрытия окна
         private void ScreenClose_Click(object sender, MouseButtonEventArgs e)
         {
             Close();
         }
+
+        // обработчик для перетаскивания окна мышью
         private void ScreenStateAndDragMove(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left && e.ClickCount == 2)
@@ -95,6 +104,7 @@ namespace CryptoWPFX
             }
         }
 
+        // загрузка списка криптовалют на главной странице
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             try
@@ -127,6 +137,7 @@ namespace CryptoWPFX
             }
         }
 
+        // обработчик анимации при наведении на кнопку открытия токена (криптовалюты в таблице)
         private void Border_MouseEnter(object sender, MouseEventArgs e)
         {
             if (sender is Border borderNextDataGrid)
@@ -134,18 +145,19 @@ namespace CryptoWPFX
                 borderNextDataGrid.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
                 borderNextDataGrid.VerticalAlignment = VerticalAlignment.Center;
                 borderNextDataGrid.HorizontalAlignment = HorizontalAlignment.Center;
-                borderNextDataGrid.Width = 60;
+                borderNextDataGrid.Width = 70;
                 borderNextDataGrid.Height = 45;
                 if (borderNextDataGrid.Child is System.Windows.Controls.Label labelBorderNext)
                 {
                     labelBorderNext.Content = "Открыть";
-                    labelBorderNext.FontSize = 12;
+                    labelBorderNext.FontSize = 15;
                     labelBorderNext.VerticalAlignment = VerticalAlignment.Center;
                     labelBorderNext.HorizontalAlignment = HorizontalAlignment.Center;
                 }
             }
         }
 
+        // обработчик анимации при отведении с кнопки открытия токена (криптовалюты в таблице)
         private void Border_MouseLeave(object sender, MouseEventArgs e)
         {
             if (sender is Border borderNextDataGrid)
@@ -154,11 +166,13 @@ namespace CryptoWPFX
                 if (borderNextDataGrid.Child is System.Windows.Controls.Label labelBorderNext)
                 {
                     labelBorderNext.Content = "▶";
-                    labelBorderNext.FontSize = 15;
+                    labelBorderNext.FontSize = 25;
                 }
             }
         }
 
+
+        // прокрутка таблица на главной
         private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             ScrollViewer scroll = sender as ScrollViewer;
@@ -172,6 +186,7 @@ namespace CryptoWPFX
             }
             e.Handled = true;
         }
+
 
         private void borderClickDataGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -206,6 +221,7 @@ namespace CryptoWPFX
             borderConverterCoin.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E00AC"));
         }
 
+        // поиск криптовалют
         private void coinInput_TextChanged(object sender, TextChangedEventArgs e)
         {
             string searchText = coinInput.Text.ToLower();
@@ -220,6 +236,7 @@ namespace CryptoWPFX
 
         }
 
+        // обработчик нажатия на кнопку для открытия токена в таблице
         private void Click_OpenToken(object sender, MouseButtonEventArgs e)
         {
             var border = sender as Border;
@@ -227,6 +244,7 @@ namespace CryptoWPFX
 
         }
 
+        // метод открытия информации о токене
         private async void OpenToken(string TokenID)
         {
             TokenActiveID = TokenID;
@@ -371,6 +389,7 @@ namespace CryptoWPFX
             
         }
 
+        // анимация при наведении на кнопку для перехода на биржу
         private void Icon_MouseEnter(object sender, MouseEventArgs e)
         {
             var icon = sender as FontAwesome.WPF.FontAwesome;
@@ -391,6 +410,7 @@ namespace CryptoWPFX
             icon.RenderTransform = translateTransform;
         }
 
+        // кнопка для перехода на биржу
         private void Icon_MouseDownGetBurse(object sender, MouseButtonEventArgs e)
         {
             var icon = sender as FontAwesome.WPF.FontAwesome;
@@ -398,13 +418,14 @@ namespace CryptoWPFX
             System.Diagnostics.Process.Start(icon.GetValue(AutomationProperties.AutomationIdProperty).ToString());
         }
 
+        // кнопка для просмотра курса токена в других валютах
         private async void Click_ConvertTokenPrice(object sender, MouseButtonEventArgs e)
         {
             if (BorderConvertTokenPrice.Visibility == Visibility.Hidden)
             {
                 BorderConvertTokenPrice.Visibility = Visibility.Visible;
-                JsonElement ConvertCurrencyToken = await CoinGeckoApi.GetInfoTokenToIDFull(TokenActiveID);
-
+                ConvertCurrencyToken = await CoinGeckoApi.GetInfoTokenToIDFull(TokenActiveID);
+                ConvertTokenPrice.Children.Clear();
                 foreach (JsonProperty property in ConvertCurrencyToken.EnumerateObject())
                 {
                     ConvertTokenPrice.Children.Add(new System.Windows.Controls.Label
@@ -422,26 +443,7 @@ namespace CryptoWPFX
 
         }
 
-        private async void SelectionChangedTimeChart(object sender, SelectionChangedEventArgs e)
-        {
-            // Получаем ComboBox, который вызвал событие
-            ComboBox comboBox = sender as ComboBox;
-
-            // Получаем выбранный элемент
-            ComboBoxItem selectedItem = comboBox.SelectedItem as ComboBoxItem;
-
-            // Проверяем, был ли выбран элемент
-            if (selectedItem != null)
-            {
-                string content = selectedItem.Content.ToString();
-                string[] strings = content.Split(' ');
-
-                var series = new XyDataSeries<DateTime, double>();
-                series = await CoinGeckoApi.GetActualChartToken(TokenActiveID, "usd", strings[0]);
-                mountainRenderSeries.DataSeries = series;
-            }
-        }
-
+        // обработчик изменения времени графика
         private async void Click_TimeSetChart(object sender, MouseButtonEventArgs e)
         {
             System.Windows.Controls.Label label = sender as System.Windows.Controls.Label;
@@ -467,15 +469,54 @@ namespace CryptoWPFX
             ChartToken.AnimateZoomExtentsCommand.Execute(null);
         }
 
+        // кнопка для возврата на главную страницу со страницы токена
         private void ClickBackTheMainView(object sender, MouseButtonEventArgs e)
         {
             TokenView.Visibility = Visibility.Collapsed;
             MainView.Visibility = Visibility.Visible;
         }
 
+        // обработчик кнопки закрытия окна об ошибке
         private void MessageClose(object sender, MouseButtonEventArgs e)
         {
             MessageBorder.Visibility = Visibility.Collapsed;
+        }
+
+        private async void SearchCryptoConvert(object sender, TextChangedEventArgs e)
+        {
+            TextBox text = sender as TextBox;
+            ConvertTokenPrice.Children.Clear();
+            foreach (JsonProperty property in ConvertCurrencyToken.EnumerateObject())
+            {
+                if (property.Name.ToUpper().Contains(text.Text.ToUpper()))
+                {
+                    ConvertTokenPrice.Children.Add(new System.Windows.Controls.Label
+                    {
+                        Content = $"{property.Value.GetDouble()} {property.Name.ToUpper()}",
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        Foreground = Brushes.White
+                    });
+                }
+            }
+            if (ConvertTokenPrice.Children.Count <= 0)
+            {
+                ConvertTokenPrice.Children.Add(new System.Windows.Controls.Label
+                {
+                    Content = "Не найдено",
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Foreground = Brushes.White
+                });
+            }
+        }
+
+        private async void TextBlock_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            // Получаем список топ N криптовалют
+            topCurrencies = await coinGeckoAPI.GetTopNCurrenciesAsync(500, 1);
+            
+            var top = topCurrencies.OrderByDescending(c => c.Price).ToList();
+
+            DataGrid.ItemsSource = top;
         }
     }
 }

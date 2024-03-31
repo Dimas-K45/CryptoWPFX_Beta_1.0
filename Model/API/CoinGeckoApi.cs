@@ -143,11 +143,9 @@ namespace CryptoWPFX.Model.API
         {
             var client = new RestClient("https://api.coingecko.com");
             var request = new RestRequest($"/api/v3/coins/{TokenID}?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false");
+            
             var response = await client.ExecuteAsync(request);
 
-            
-            try
-            {
                 /// Разбор JSON-ответа
                 JsonDocument document = JsonDocument.Parse(response.Content);
                 // Получаем массив "tickers"
@@ -172,8 +170,6 @@ namespace CryptoWPFX.Model.API
                     tickerDataList.Add(tickerData);
                 }
                 return tickerDataList;
-            }
-            catch { return new List<TickerData> { new TickerData { Name = response.Content } }; }
             
         }
 
