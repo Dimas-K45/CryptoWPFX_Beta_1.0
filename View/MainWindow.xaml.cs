@@ -37,20 +37,24 @@ namespace CryptoWPFX
             if (input.Length <= 3)
                 return input;
 
-            string result = "";
-            int count = 0;
+            decimal number = decimal.Parse(input);
+            string result = number.ToString("N");
 
-            for (int i = input.Length - 1; i >= 0; i--)
-            {
-                result = input[i] + result;
-                count++;
+            //string result = "";
+            //int count = 0;
 
-                if (count == 3 && i > 0)
-                {
-                    result = separator + result;
-                    count = 0;
-                }
-            }
+            //for (int i = input.Length - 1; i >= 0; i--)
+            //{
+            //    result = input[i] + result;
+            //    count++;
+
+            //    if (count == 3 && i > 0)
+            //    {
+            //        result = separator + result;
+            //        count = 0;
+            //    }
+
+            //}
 
             return result;
         }
@@ -68,13 +72,13 @@ namespace CryptoWPFX
             double num = (double)number;
 
             if (number >= 1000000000000)
-                return (num / 1000000000000).ToString("0.#") + " T";
+                return (num / 1000000000000).ToString("0.###") + " T";
             if (number >= 1000000000)
-                return (num / 1000000000).ToString("0.#") + " B";
+                return (num / 1000000000).ToString("0.###") + " B";
             if (number >= 1000000)
-                return (num / 1000000).ToString("0.#") + " M";
+                return (num / 1000000).ToString("0.###") + " M";
             if (number >= 1000)
-                return (num / 1000).ToString("0.#") + " K";
+                return (num / 1000).ToString("0.###") + " K";
 
             return number.ToString();
         }
@@ -264,20 +268,21 @@ namespace CryptoWPFX
                 }
             }
 
-            //построение графика
-            var series = new XyDataSeries<DateTime, double>();
-            series = await CoinGeckoApi.GetActualChartToken(TokenID, "usd", "1");
-            mountainRenderSeries.DataSeries = series;
-            ChartToken.AnimateZoomExtentsCommand.Execute(null);
-
-            try
-            {
+            //try
+            //{
                 NameToken.Content = InfoToken[CoinGeckoApi.CoinField.Symbol.ToString().ToLower()].ToString().ToUpper();
                 PrecentToken.Content = $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_24h.ToString().ToLower()].ToString().Replace(".", ",")), 2)}%";
                 if (PrecentToken.Content.ToString()[0] == '-')
                 {
                     PrecentToken.Foreground = Brushes.Red;
                 }
+
+                //построение графика
+                var series = new XyDataSeries<DateTime, double>();
+                series = await CoinGeckoApi.GetActualChartToken(TokenID, "usd", "1");
+                mountainRenderSeries.DataSeries = series;
+                ChartToken.AnimateZoomExtentsCommand.Execute(null);
+
                 // Создаем новый объект BitmapImage
                 BitmapImage bitmap = new BitmapImage();
 
@@ -319,8 +324,41 @@ namespace CryptoWPFX
                 }
                 else
                 {
-                    PriceToken.Content = InsertSeparator($"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Current_Price.ToString().ToLower()].ToString().Replace(".", ",")), 2)}", ' ');
+                    PriceToken.Content = InsertSeparator(InfoToken[CoinGeckoApi.CoinField.Current_Price.ToString().ToLower()].ToString().Replace(".", ","), ' ');
                 }
+
+                void TopBurseSecurity(ref System.Windows.Controls.Label lab, string name)
+                {
+                    lab.FontWeight = FontWeights.Bold;
+                    if (name.ToLower().Contains("bybit"))
+                        lab.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#f7a600"));
+                    else if (name.ToLower().Contains("binance"))
+                        lab.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#f6cd2f"));
+                    else if (name.ToLower().Contains("okx"))
+                        lab.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#fff700"));
+                    else if (name.ToLower().Contains("mexc"))
+                        lab.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1972e2"));
+                    else if (name.ToLower().Contains("bingx"))
+                        lab.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#435af6"));
+                    else if (name.ToLower().Contains("kucoin"))
+                        lab.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#23af91"));
+                    else if (name.ToLower().Contains("gate.io"))
+                        lab.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#17e6a1"));
+                    else if (name.ToLower().Contains("huobi"))
+                        lab.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#008fdd"));
+                    else if (name.ToLower().Contains("bitget"))
+                        lab.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1ea1b4"));
+                    else if (name.ToLower().Contains("coinbase"))
+                        lab.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0052ff"));
+                    
+                    else
+                    {
+                        lab.Foreground = Brushes.White;
+                        lab.FontWeight = FontWeights.Normal;
+                    }
+                       
+                }
+
                 PanelBurse.Children.Clear();
                 List<TickerData> tickerDatas = await GetActualBurse(TokenID);
                 foreach (TickerData tickerData in tickerDatas)
@@ -341,8 +379,8 @@ namespace CryptoWPFX
                     // Создание и добавление Label 1
                     System.Windows.Controls.Label label1 = new System.Windows.Controls.Label();
                     label1.Content = tickerData.Name;
+                    TopBurseSecurity(ref label1, tickerData.Name);
                     label1.Margin = new Thickness(5);
-                    label1.Foreground = Brushes.White;
                     grid.Children.Add(label1);
 
                     // Создание и добавление Label 2
@@ -377,14 +415,14 @@ namespace CryptoWPFX
 
                     PanelBurse.Children.Add(grid);
                 }
-            }
-            catch
-            {
-                MessageBorder.Visibility = Visibility.Visible;
-                MessageText.Text = "Слишком много запросов, попробуйте позже...";
-                TokenView.Visibility = Visibility.Collapsed;
-                MainView.Visibility = Visibility.Visible;
-            }
+            //}
+            //catch
+            //{
+            //    MessageBorder.Visibility = Visibility.Visible;
+            //    MessageText.Text = "Слишком много запросов, попробуйте позже...";
+            //    TokenView.Visibility = Visibility.Collapsed;
+            //    MainView.Visibility = Visibility.Visible;
+            //}
 
             
         }
@@ -482,7 +520,8 @@ namespace CryptoWPFX
             MessageBorder.Visibility = Visibility.Collapsed;
         }
 
-        private async void SearchCryptoConvert(object sender, TextChangedEventArgs e)
+        // поиск курса токена в других валютах (на странице с токеном)
+        private void SearchCryptoConvert(object sender, TextChangedEventArgs e)
         {
             TextBox text = sender as TextBox;
             ConvertTokenPrice.Children.Clear();
@@ -509,12 +548,113 @@ namespace CryptoWPFX
             }
         }
 
-        private async void TextBlock_MouseDown(object sender, MouseButtonEventArgs e)
+        // сортировка главной таблицы с монетами
+        private void ClickSortMainDataGrid(object sender, MouseButtonEventArgs e)
         {
-            // Получаем список топ N криптовалют
-            topCurrencies = await coinGeckoAPI.GetTopNCurrenciesAsync(500, 1);
-            
-            var top = topCurrencies.OrderByDescending(c => c.Price).ToList();
+            var SortText = sender as TextBlock;
+            var top = new List<CryptoCurrency>();
+
+            if (SortText.Text.Split(" ")[0] == "Цена")
+            {
+                if (SortText.Text[SortText.Text.Length - 1] == '●')
+                {
+                    top = topCurrencies.OrderByDescending(c => c.Price).ToList();
+                    SortText.Text = "Цена ▽";
+                }
+                else if (SortText.Text[SortText.Text.Length - 1] == '▽')
+                {
+                    top = topCurrencies.OrderBy(c => c.Price).ToList();
+                    SortText.Text = "Цена △";
+                }
+                else if (SortText.Text[SortText.Text.Length - 1] == '△')
+                {
+                    top = topCurrencies;
+                    SortText.Text = "Цена ●";
+                }
+                foreach (TextBlock item in GridNameDataGridColumn.Children)
+                {
+                    if (item.Text.Split()[0] != "Цена" && item.Text.Split()[0] != "Монета" && item.Text.Split()[0] != "Переход")
+                    {
+                        item.Text = item.Text.Replace(item.Text.ToCharArray()[item.Text.Length - 1], '●');
+                    }
+                }
+            }
+            else if (SortText.Text.Split(" ")[0] == "Название")
+            {
+                if (SortText.Text[SortText.Text.Length - 1] == '●')
+                {
+                    top = topCurrencies.OrderByDescending(c => c.Name).ToList();
+                    SortText.Text = "Название ▽";
+                }
+                else if (SortText.Text[SortText.Text.Length - 1] == '▽')
+                {
+                    top = topCurrencies.OrderBy(c => c.Name).ToList();
+                    SortText.Text = "Название △";
+                }
+                else if (SortText.Text[SortText.Text.Length - 1] == '△')
+                {
+                    top = topCurrencies;
+                    SortText.Text = "Название ●";
+                }
+                foreach (TextBlock item in GridNameDataGridColumn.Children)
+                {
+                    if (item.Text.Split()[0] != "Название" && item.Text.Split()[0] != "Монета" && item.Text.Split()[0] != "Переход")
+                    {
+                        item.Text = item.Text.Replace(item.Text.ToCharArray()[item.Text.Length - 1], '●');
+                    }
+                }
+            }
+            else if (SortText.Text.Split(" ")[0] == "Символы")
+            {
+                if (SortText.Text[SortText.Text.Length - 1] == '●')
+                {
+                    top = topCurrencies.OrderByDescending(c => c.Symbol).ToList();
+                    SortText.Text = "Символы ▽";
+                }
+                else if (SortText.Text[SortText.Text.Length - 1] == '▽')
+                {
+                    top = topCurrencies.OrderBy(c => c.Symbol).ToList();
+                    SortText.Text = "Символы △";
+                }
+                else if (SortText.Text[SortText.Text.Length - 1] == '△')
+                {
+                    top = topCurrencies;
+                    SortText.Text = "Символы ●";
+                }
+                foreach (TextBlock item in GridNameDataGridColumn.Children)
+                {
+                    if (item.Text.Split()[0] != "Символы" && item.Text.Split()[0] != "Монета" && item.Text.Split()[0] != "Переход")
+                    {
+                        item.Text = item.Text.Replace(item.Text.ToCharArray()[item.Text.Length - 1], '●');
+                    }
+                }
+            }
+            else if (SortText.Text.Split(" ")[0] == "Объем")
+            {
+                if (SortText.Text[SortText.Text.Length - 1] == '●')
+                {
+                    top = topCurrencies.OrderByDescending(c => c.Volume).ToList();
+                    SortText.Text = "Объем торгов 24ч ▽";
+                }
+                else if (SortText.Text[SortText.Text.Length - 1] == '▽')
+                {
+                    top = topCurrencies.OrderBy(c => c.Volume).ToList();
+                    SortText.Text = "Объем торгов 24ч △";
+                }
+                else if (SortText.Text[SortText.Text.Length - 1] == '△')
+                {
+                    top = topCurrencies;
+                    SortText.Text = "Объем торгов 24ч ●";
+                }
+                foreach (TextBlock item in GridNameDataGridColumn.Children)
+                {
+                    if (item.Text.Split()[0] != "Объем" && item.Text.Split()[0] != "Монета" && item.Text.Split()[0] != "Переход")
+                    {
+                        item.Text = item.Text.Replace(item.Text.ToCharArray()[item.Text.Length - 1], '●');
+                    }
+                }
+            }
+
 
             DataGrid.ItemsSource = top;
         }
