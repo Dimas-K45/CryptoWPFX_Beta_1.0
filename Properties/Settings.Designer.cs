@@ -22,5 +22,14 @@ namespace CryptoWPFX.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("CG-pibZCCfRXjV16buMmrrk16SU")]
+        public string APIKeyCoinGecko {
+            get {
+                return ((string)(this["APIKeyCoinGecko"]));
+            }
+        }
     }
 }

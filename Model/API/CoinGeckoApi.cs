@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using RestSharp;
 using SciChart.Charting.Model.DataSeries;
 using System.Text.Json;
+using System.Windows;
 
 namespace CryptoWPFX.Model.API
 {
@@ -141,10 +142,14 @@ namespace CryptoWPFX.Model.API
         //xxx//
         public static async Task<List<TickerData>> GetActualBurse(string TokenID)
         {
-            var client = new RestClient("https://api.coingecko.com");
-            var request = new RestRequest($"/api/v3/coins/{TokenID}?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false");
-            
-            var response = await client.ExecuteAsync(request);
+            //var client = new RestClient("https://api.coingecko.com");
+            //var request = new RestRequest($"/api/v3/coins/{TokenID}?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false");
+            var options = new RestClientOptions($"https://api.coingecko.com/api/v3/coins/{TokenID}?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false");
+            var client = new RestClient(options);
+            var request = new RestRequest("");
+            request.AddHeader("x-cg-demo-api-key", Properties.Settings.Default.APIKeyCoinGecko);
+            var response = await client.GetAsync(request);
+
 
                 /// Разбор JSON-ответа
                 JsonDocument document = JsonDocument.Parse(response.Content);
@@ -175,10 +180,14 @@ namespace CryptoWPFX.Model.API
 
         public static async Task<JsonElement> GetInfoTokenToIDFull(string TokenID)
         {
-            var client = new RestClient("https://api.coingecko.com");
-            var request = new RestRequest($"/api/v3/coins/{TokenID}?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false");
+            //var client = new RestClient("https://api.coingecko.com");
+            //var request = new RestRequest($"/api/v3/coins/{TokenID}?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false");
+            var options = new RestClientOptions($"https://api.coingecko.com/api/v3/coins/{TokenID}?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false");
+            var client = new RestClient(options);
+            var request = new RestRequest("");
+            request.AddHeader("x-cg-demo-api-key", Properties.Settings.Default.APIKeyCoinGecko);
+            var response = await client.GetAsync(request);
 
-            var response = await client.ExecuteAsync(request);
 
             Console.WriteLine(response.Content);
 
@@ -199,11 +208,13 @@ namespace CryptoWPFX.Model.API
 
         public async static Task<Dictionary<string, object>> GetInfoTokenToID(string TokenID, string cyrrency)
         {
-            var client = new RestClient("https://api.coingecko.com");
-            var request = new RestRequest($"/api/v3/coins/markets?vs_currency={cyrrency}&ids={TokenID}&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=1h%2C24h%2C7d%2C14d%2C30d%2C1y&locale=ru&precision=8");
-
-            var response = await client.ExecuteAsync(request);
-
+            //var client = new RestClient("https://api.coingecko.com");
+            //var request = new RestRequest($"/api/v3/coins/markets?vs_currency={cyrrency}&ids={TokenID}&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=1h%2C24h%2C7d%2C14d%2C30d%2C1y&locale=ru&precision=8");
+            var options = new RestClientOptions($"https://api.coingecko.com/api/v3/coins/markets?vs_currency={cyrrency}&ids={TokenID}&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=1h%2C24h%2C7d%2C14d%2C30d%2C1y&locale=ru&precision=8");
+            var client = new RestClient(options);
+            var request = new RestRequest("");
+            request.AddHeader("x-cg-demo-api-key", Properties.Settings.Default.APIKeyCoinGecko);
+            var response = await client.GetAsync(request);
 
             string content = response.Content.Trim();
             if (content.StartsWith("[") && content.EndsWith("]"))
@@ -266,10 +277,14 @@ namespace CryptoWPFX.Model.API
 
         public static async Task<XyDataSeries<DateTime, double>> GetActualChartToken(string TokenID, string currency, string Days)
         {
-            var client = new RestClient("https://api.coingecko.com");
-            var request = new RestRequest($"/api/v3/coins/{TokenID}/market_chart?vs_currency={currency}&days={Days}&precision=8");
+            //var client = new RestClient("https://api.coingecko.com");
+            //var request = new RestRequest($"/api/v3/coins/{TokenID}/market_chart?vs_currency={currency}&days={Days}&precision=8");
+            var options = new RestClientOptions($"https://api.coingecko.com/api/v3/coins/{TokenID}/market_chart?vs_currency={currency}&days={Days}&precision=8");
+            var client = new RestClient(options);
+            var request = new RestRequest("");
+            request.AddHeader("x-cg-demo-api-key", Properties.Settings.Default.APIKeyCoinGecko);
+            var response = await client.GetAsync(request);
 
-            var response = await client.ExecuteAsync(request);
             var series = new XyDataSeries<DateTime, double>();
 
             if (response.IsSuccessful)

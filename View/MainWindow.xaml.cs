@@ -1,10 +1,12 @@
 ﻿using CryptoWPFX.Model;
 using CryptoWPFX.Model.API;
 using SciChart.Charting.Model.DataSeries;
+using SciChart.Core.Extensions;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection.Emit;
+using System.Security.Policy;
 using System.Text;
 using System.Text.Json;
 using System.Windows;
@@ -40,26 +42,21 @@ namespace CryptoWPFX
             if (input.Length <= 3)
                 return input;
 
-            decimal number = decimal.Parse(input.Replace(".", ","));
-            string result = number.ToString("N");
-
-            //string result = "";
-            //int count = 0;
-
-            //for (int i = input.Length - 1; i >= 0; i--)
-            //{
-            //    result = input[i] + result;
-            //    count++;
-
-            //    if (count == 3 && i > 0)
-            //    {
-            //        result = separator + result;
-            //        count = 0;
-            //    }
-
-            //}
-
-            return result;
+            if (input.ToLower().Contains('e'))
+            {
+                string[] numConvert = input.ToLower().Split('e');
+                string[] span = input.Split('-');
+                string resultSpan = (numConvert[0].ToDouble() / Math.Pow(10, span[span.Length - 1].ToDouble())).ToString("G");
+                //decimal number = decimal.Parse(resultSpan.Replace(".", ","));
+                string result = resultSpan;
+                return result;
+            }
+            else
+            {
+                decimal number = decimal.Parse(input.Replace(".", ","));
+                string result = number.ToString("N");
+                return result;
+            }
         }
 
         // метод для аббривеатуры цифр (1M, 1B, 1T)
@@ -273,7 +270,8 @@ namespace CryptoWPFX
 
             //try
             //{
-                NameToken.Content = InfoToken[CoinGeckoApi.CoinField.Symbol.ToString().ToLower()].ToString().ToUpper();
+                NameToken.Content = InfoToken[CoinGeckoApi.CoinField.Name.ToString().ToLower()].ToString().ToUpper();
+                SymbolToken.Content = InfoToken[CoinGeckoApi.CoinField.Symbol.ToString().ToLower()].ToString().ToUpper();
                 PrecentToken.Content = $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_24h.ToString().ToLower()].ToString().Replace(".", ",")), 2)}%";
                 if (PrecentToken.Content.ToString()[0] == '-')
                 {
@@ -295,16 +293,16 @@ namespace CryptoWPFX
                 bitmap.EndInit();
 
                 LogoToken.Source = bitmap;
-                MaxPriceToken.Content = InsertSeparator(InfoToken[CoinGeckoApi.CoinField.High_24h.ToString().ToLower()].ToString());
-                MinPriceToken.Content = InsertSeparator(InfoToken[CoinGeckoApi.CoinField.Low_24h.ToString().ToLower()].ToString());
+                //MaxPriceToken.Content = InsertSeparator(InfoToken[CoinGeckoApi.CoinField.High_24h.ToString().ToLower()].ToString());
+                //MinPriceToken.Content = InsertSeparator(InfoToken[CoinGeckoApi.CoinField.Low_24h.ToString().ToLower()].ToString());
                 VolumeToken.Content = AbbreviateNumber(InfoToken[CoinGeckoApi.CoinField.Market_Cap.ToString().ToLower()].ToString());
 
-                Percent_1h.Content = $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_1h_In_Currency.ToString().ToLower()].ToString().Replace(".", ",")), 2)}%";
-                Percent_24h.Content = $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_24h_In_Currency.ToString().ToLower()].ToString().Replace(".", ",")), 2)}%";
-                Percent_7d.Content = $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_7d_In_Currency.ToString().ToLower()].ToString().Replace(".", ",")), 2)}%";
-                Percent_14d.Content = $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_14d_In_Currency.ToString().ToLower()].ToString().Replace(".", ",")), 2)}%";
-                Percent_30d.Content = $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_30d_In_Currency.ToString().ToLower()].ToString().Replace(".", ",")), 2)}%";
-                Percent_1year.Content = $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_1y_In_Currency.ToString().ToLower()].ToString().Replace(".", ",")), 2)}%";
+                Percent_1h.Content = InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_1h_In_Currency.ToString().ToLower()] == null ? "X" : $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_1h_In_Currency.ToString().ToLower()].ToString().Replace(".", ",")), 2)}%";
+                Percent_24h.Content = InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_24h_In_Currency.ToString().ToLower()] == null ? "X" : $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_24h_In_Currency.ToString().ToLower()].ToString().Replace(".", ",")), 2)}%";
+                Percent_7d.Content = InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_7d_In_Currency.ToString().ToLower()] == null ? "X" : $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_7d_In_Currency.ToString().ToLower()].ToString().Replace(".", ",")), 2)}%";
+                Percent_14d.Content = InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_14d_In_Currency.ToString().ToLower()] == null ? "X" : $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_14d_In_Currency.ToString().ToLower()].ToString().Replace(".", ",")), 2)}%";
+                Percent_30d.Content = InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_30d_In_Currency.ToString().ToLower()] == null ? "X" : $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_30d_In_Currency.ToString().ToLower()].ToString().Replace(".", ",")), 2)}%";
+                Percent_1year.Content = InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_1y_In_Currency.ToString().ToLower()] == null ? "X" : $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_1y_In_Currency.ToString().ToLower()].ToString().Replace(".", ",")), 2)}%";
 
                 foreach (var label in GridPercentAll.Children)
                 {
@@ -317,20 +315,25 @@ namespace CryptoWPFX
                     }
                 }
                 string[] prices = InfoToken[CoinGeckoApi.CoinField.Current_Price.ToString().ToLower()].ToString().Split('.');
-                if (prices[0].Length < 4)
-                {
-                    PriceToken.Content = $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Current_Price.ToString().ToLower()].ToString().Replace(".", ",")), 6)}";
-                }
-                else if (prices[0].Length < 2)
-                {
-                    PriceToken.Content = $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Current_Price.ToString().ToLower()].ToString().Replace(".", ",")), 8)}";
-                }
-                else
-                {
-                    PriceToken.Content = InsertSeparator(InfoToken[CoinGeckoApi.CoinField.Current_Price.ToString().ToLower()].ToString().Replace(".", ","));
-                }
 
-                void TopBurseSecurity(ref System.Windows.Controls.Label lab, string name)
+            if (prices[0].Length <= 1 || prices[0] == "0" || prices[0].ToLower().Contains("e"))
+            {
+                PriceToken.Content = InsertSeparator(InfoToken[CoinGeckoApi.CoinField.Current_Price.ToString().ToLower()].ToString().Replace(".", ","));
+            }
+            else if (prices[0].Length < 4)
+            {
+                PriceToken.Content = $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Current_Price.ToString().ToLower()].ToString().Replace(".", ",")), 6)}";
+            }
+            else if (prices[0].Length < 2)
+            {
+                PriceToken.Content = $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Current_Price.ToString().ToLower()].ToString().Replace(".", ",")), 8)}";
+            }
+            else
+            {
+                PriceToken.Content = InsertSeparator(InfoToken[CoinGeckoApi.CoinField.Current_Price.ToString().ToLower()].ToString().Replace(".", ","));
+            }
+
+            void TopBurseSecurity(ref System.Windows.Controls.Label lab, string name)
                 {
                     lab.FontWeight = FontWeights.Bold;
                     if (name.ToLower().Contains("bybit"))
@@ -456,9 +459,13 @@ namespace CryptoWPFX
         {
             var icon = sender as FontAwesome.WPF.FontAwesome;
             // Открываем ссылку в браузере
-            ProcessStartInfo sInfo = new ProcessStartInfo(icon.GetValue(AutomationProperties.AutomationIdProperty).ToString());
-            Process.Start(sInfo);
             //Process.Start(icon.GetValue(AutomationProperties.AutomationIdProperty).ToString());
+            // Открываем ссылку в браузере по умолчанию
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = icon.GetValue(AutomationProperties.AutomationIdProperty).ToString(),
+                UseShellExecute = true
+            });
         }
 
         // кнопка для просмотра курса токена в других валютах
