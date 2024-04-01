@@ -21,9 +21,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- border чтобы управлять окошком нашим -->
-                <Border Background="Transparent" MouseDown="ScreenStateAndDragMove" Grid.ColumnSpan="3" Height="50" VerticalAlignment="Top">
-                    
-                </Border>
+                <Border Background="Transparent" MouseDown="ScreenStateAndDragMove" Grid.ColumnSpan="3" Height="50" VerticalAlignment="Top"/>
 
                 <!-- Кнопочик windowStyle-->
                 <Grid Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="20">
@@ -31,12 +29,19 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="5"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <!-- Кнопка для закрытия приложения -->
-                    <Border Grid.Column="2" Style="{StaticResource moveCursorInBorderClose}" Cursor="Hand" MouseDown="ScreenClose_Click" Width="20" Height="20" CornerRadius="30" />
-                    <Border Grid.Column="1"/>
                     <!-- Кнопка для открытия на весь экран и наоборот -->
-                    <Border Grid.Column="0" Style="{StaticResource moveCursorInBorderFullScreen}" Cursor="Hand" MouseDown="FullScreenButton_Click" Width="20" Height="20" CornerRadius="30"/>
+                    <!--Кнопка чтобы свернуть экран-->
+                    <Border Grid.Column="0" Style="{StaticResource moveCursorInBorderHideScreen}" Cursor="Hand" MouseDown="ScrennHide_Click" Width="20" Height="20" CornerRadius="30"/>
+                    <Border Grid.Column="1"/>
+                    <!--Кнопка чтобы развернуть на весь экран и наоборот-->
+                    <Border Grid.Column="2" Style="{StaticResource moveCursorInBorderFullScreen}" Cursor="Hand" MouseDown="FullScreenButton_Click" Width="20" Height="20" CornerRadius="30"/>
+                    <Border Grid.Column="3"/>
+                    <!-- Кнопка для закрытия приложения -->
+                    <Border Grid.Column="4" Style="{StaticResource moveCursorInBorderClose}" Cursor="Hand" MouseDown="ScreenClose_Click" Width="20" Height="20" CornerRadius="30" />
+
                 </Grid>
 
                 <!-- Добавленная таблица DataGrid -->
@@ -48,8 +53,8 @@
                     </Grid.RowDefinitions>
 
                     <!--Поиск монеты-->
-                    <Border Grid.Row="0" HorizontalAlignment="Center" CornerRadius="10" Width="900" Height="45" BorderBrush="DarkBlue" BorderThickness="2">
-                        <TextBox TextChanged="coinInput_TextChanged" Padding="8,8,8,5" x:Name="coinInput" CaretBrush="White" VerticalAlignment="Center" HorizontalAlignment="Center"  FontSize="18" Width="900" Height="40" Foreground="#fff" BorderThickness="0" Background="Transparent" />
+                    <Border x:Name="borderSearch" Grid.Row="0" HorizontalAlignment="Center" CornerRadius="10" Width="850" Height="45" BorderBrush="DarkBlue" BorderThickness="2">
+                        <TextBox TextChanged="coinInput_TextChanged" Padding="8,8,8,5" x:Name="coinInput" CaretBrush="White" VerticalAlignment="Center" HorizontalAlignment="Center"  FontSize="18" Width="850" Height="40" Foreground="#fff" BorderThickness="0" Background="Transparent" />
                     </Border>
 
                     <Border x:Name="borderHeaderDataGrid" Background="#192038" Padding="16,10,5,10" Margin="0,155,0,0" CornerRadius="10">
@@ -75,20 +80,20 @@
                     <!-- Основной DataGrid с криптой -->
                     <ScrollViewer PreviewMouseWheel="ScrollViewer_PreviewMouseWheel"  Grid.Row="2" VerticalScrollBarVisibility="Hidden" Margin="0,10,0,0">
                         <DataGrid x:Name="DataGrid"
-      CanUserAddRows="False"
-      IsReadOnly="True"
-      AutoGenerateColumns="False"
-      VirtualizingPanel.IsVirtualizing="True"
-      RowBackground="Transparent"
-      BorderThickness="1"
-      BorderBrush="#7163ba"
-      Background="#000A17"
-      HeadersVisibility="Column"
-      ColumnHeaderHeight="10"
-      RowHeight="50"
-      GridLinesVisibility="None"
-      Foreground="#fff"
-      VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                          CanUserAddRows="False"
+                          IsReadOnly="True"
+                          AutoGenerateColumns="False"
+                          VirtualizingPanel.IsVirtualizing="True"
+                          RowBackground="Transparent"
+                          BorderThickness="1"
+                          BorderBrush="#7163ba"
+                          Background="#000A17"
+                          HeadersVisibility="Column"
+                          ColumnHeaderHeight="10"
+                          RowHeight="50"
+                          GridLinesVisibility="None"
+                          Foreground="#fff"
+                          VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
 
                             <!-- Cтили для header -->
                             <DataGrid.ColumnHeaderStyle>
@@ -170,20 +175,20 @@
                     <!--Второй DataGrid избранные монеты-->
                     <ScrollViewer PreviewMouseWheel="ScrollViewer_PreviewMouseWheel"  Grid.Row="1" VerticalScrollBarVisibility="Hidden" Margin="0,10,0,0" Visibility="Collapsed">
                         <DataGrid x:Name="DataGridMainPoolCrypto"
-      CanUserAddRows="False"
-      IsReadOnly="True"
-      AutoGenerateColumns="False"
-      VirtualizingPanel.IsVirtualizing="True"
-      RowBackground="Transparent"
-      BorderThickness="1"
-      BorderBrush="#7163ba"
-      Background="#000A17"
-      HeadersVisibility="Column"
-      ColumnHeaderHeight="10"
-      RowHeight="50"
-      GridLinesVisibility="None"
-      Foreground="#fff"
-      VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                          CanUserAddRows="False"
+                          IsReadOnly="True"
+                          AutoGenerateColumns="False"
+                          VirtualizingPanel.IsVirtualizing="True"
+                          RowBackground="Transparent"
+                          BorderThickness="1"
+                          BorderBrush="#7163ba"
+                          Background="#000A17"
+                          HeadersVisibility="Column"
+                          ColumnHeaderHeight="10"
+                          RowHeight="50"
+                          GridLinesVisibility="None"
+                          Foreground="#fff"
+                          VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
 
                             <!-- Cтили для header -->
                             <DataGrid.ColumnHeaderStyle>
@@ -252,29 +257,47 @@
                 </Grid>
 
                 <!--Третий Grid конвертер валют-->
-                <Grid x:Name="ConverterCoin" Visibility="Collapsed">
+                <Grid Grid.Column="1" x:Name="ConverterCoin" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Top">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
-
-                    <TextBlock Text="Cryptocurrency Converter" FontSize="20" FontWeight="Bold" Margin="10" Foreground="White"/>
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10">
-                        <TextBlock Text="Amount: " VerticalAlignment="Center" Foreground="White"/>
-                        <TextBox Text="{Binding Amount, Mode=TwoWay}" Width="100" Margin="5" />
+                    <Label Grid.Row="0" Content="Конвертация Монет" Margin="0,150,0,20" Foreground="#fff" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20"/>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal">
+                        <Label Content="Введите колво монет" Style="{StaticResource labelConverterCrupto}" />
+                        <TextBox x:Name="amountTextBox" Margin="15" Width="100"/>
+                        <Label Content="Введите монету" Style="{StaticResource labelConverterCrupto}"/>
+                        <Border CornerRadius="10" BorderBrush="DarkBlue" BorderThickness="5">
+                            <ComboBox x:Name="fromCurrencyComboBox" Width="180" Background="Transparent" BorderBrush="DarkBlue" BorderThickness="1">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Image Width="30" Height="30" Source="{Binding Image}" Margin="5" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Symbol}" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </Border>
+                        <Label Content="Введите монету" Style="{StaticResource labelConverterCrupto}"/>
+                        <ComboBox x:Name="toCurrencyComboBox"  Margin="15" Width="180">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Width="30" Height="30" Source="{Binding Image}" Margin="5"/>
+                                        <TextBlock Text="{Binding Symbol}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <Label Content="Итого" Style="{StaticResource labelConverterCrupto}"/>
+                        <TextBlock x:Name="resultTextBlock" Width="100" Background="Red" Margin="15"/>
                     </StackPanel>
-
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="10">
-                        <TextBlock Text="Source Currency: " VerticalAlignment="Center" Foreground="White"/>
-                        <ComboBox  ItemsSource="{Binding SupportedCurrencies}" SelectedItem="{Binding SourceCurrency, Mode=TwoWay}" Width="100" Margin="5"/>
-                        <TextBlock Foreground="White" Text="Target Currency: " VerticalAlignment="Center" Margin="10, 0, 0, 0"/>
-                        <ComboBox  ItemsSource="{Binding SupportedCurrencies}" SelectedItem="{Binding TargetCurrency, Mode=TwoWay}" Width="100" Margin="5"/>
-                    </StackPanel>
-
-                    <TextBlock Foreground="White" Text="{Binding ConvertedAmountLabel}" Grid.Row="3" Margin="10" FontWeight="Bold"/>
                 </Grid>
-
 
 
                 <!-- Добавленная  бокового меню для навигации между таблицами -->

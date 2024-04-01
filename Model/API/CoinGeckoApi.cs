@@ -48,7 +48,7 @@ namespace CryptoWPFX.Model.API
         }
         public async Task<List<CryptoCurrency>> GetTopNCurrenciesAsync(int topN, int pageNum)
         {
-            string validatedTopN = topN > 500 ? "500" : (topN < 0 ? "1" : topN.ToString());
+            string validatedTopN = topN > 250 ? "250" : (topN < 0 ? "1" : topN.ToString());
             string validatedpageNum = pageNum < 0 ? "1" : pageNum.ToString();
 
             string url = $"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page={validatedTopN}&page={validatedpageNum}&sparkline=false&locale=en";

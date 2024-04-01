@@ -83,6 +83,11 @@ namespace CryptoWPFX
             FullScreenState();
         }
 
+        private void ScrennHide_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.MainWindow.WindowState = WindowState.Minimized;
+        }
+
         private void ScreenClose_Click(object sender, MouseButtonEventArgs e)
         {
             Close();
@@ -104,10 +109,12 @@ namespace CryptoWPFX
             try
             {
                 // Получаем список топ N криптовалют
-                topCurrencies = await coinGeckoAPI.GetTopNCurrenciesAsync(500, 1);
+                topCurrencies = await coinGeckoAPI.GetTopNCurrenciesAsync(250, 1);
 
                 // Привязываем список к DataGrid
                 DataGrid.ItemsSource = topCurrencies;
+                fromCurrencyComboBox.ItemsSource = topCurrencies;
+                toCurrencyComboBox.ItemsSource= topCurrencies;
                 db.Database.EnsureCreated();
                 foreach (var currency in topCurrencies)
                 {
@@ -193,6 +200,7 @@ namespace CryptoWPFX
             DataGridMainPoolCrypto.Visibility = Visibility.Collapsed;
             ConverterCoin.Visibility = Visibility.Collapsed;
             borderHeaderDataGrid.Visibility = Visibility.Visible;
+            borderSearch.Visibility = Visibility.Visible;
             borderClickDataGrid.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E00AC"));
             borderClickDataGridMainPoolCrypto.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
             borderConverterCoin.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
@@ -215,9 +223,11 @@ namespace CryptoWPFX
             DataGridMainPoolCrypto.Visibility = Visibility.Collapsed;
             ConverterCoin.Visibility = Visibility.Visible;
             borderHeaderDataGrid.Visibility = Visibility.Collapsed;
+            borderSearch.Visibility = Visibility.Collapsed;
             borderClickDataGrid.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
             borderClickDataGridMainPoolCrypto.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
             borderConverterCoin.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E00AC"));
+
         }
 
         private void coinInput_TextChanged(object sender, TextChangedEventArgs e)
