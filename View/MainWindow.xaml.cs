@@ -1,6 +1,8 @@
 ﻿using CryptoWPFX.Model;
 using CryptoWPFX.Model.API;
 using SciChart.Charting.Model.DataSeries;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
@@ -31,13 +33,14 @@ namespace CryptoWPFX
         public MainWindow()
         {
             InitializeComponent();
+            //Properties.Settings.Default
         }
-        static string InsertSeparator(string input, char separator)
+        static string InsertSeparator(string input)
         {
             if (input.Length <= 3)
                 return input;
 
-            decimal number = decimal.Parse(input);
+            decimal number = decimal.Parse(input.Replace(".", ","));
             string result = number.ToString("N");
 
             //string result = "";
@@ -292,8 +295,8 @@ namespace CryptoWPFX
                 bitmap.EndInit();
 
                 LogoToken.Source = bitmap;
-                MaxPriceToken.Content = InsertSeparator(InfoToken[CoinGeckoApi.CoinField.High_24h.ToString().ToLower()].ToString(), ' ');
-                MinPriceToken.Content = InsertSeparator(InfoToken[CoinGeckoApi.CoinField.Low_24h.ToString().ToLower()].ToString(), ' ');
+                MaxPriceToken.Content = InsertSeparator(InfoToken[CoinGeckoApi.CoinField.High_24h.ToString().ToLower()].ToString());
+                MinPriceToken.Content = InsertSeparator(InfoToken[CoinGeckoApi.CoinField.Low_24h.ToString().ToLower()].ToString());
                 VolumeToken.Content = AbbreviateNumber(InfoToken[CoinGeckoApi.CoinField.Market_Cap.ToString().ToLower()].ToString());
 
                 Percent_1h.Content = $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_1h_In_Currency.ToString().ToLower()].ToString().Replace(".", ",")), 2)}%";
@@ -324,7 +327,7 @@ namespace CryptoWPFX
                 }
                 else
                 {
-                    PriceToken.Content = InsertSeparator(InfoToken[CoinGeckoApi.CoinField.Current_Price.ToString().ToLower()].ToString().Replace(".", ","), ' ');
+                    PriceToken.Content = InsertSeparator(InfoToken[CoinGeckoApi.CoinField.Current_Price.ToString().ToLower()].ToString().Replace(".", ","));
                 }
 
                 void TopBurseSecurity(ref System.Windows.Controls.Label lab, string name)
@@ -344,7 +347,7 @@ namespace CryptoWPFX
                         lab.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#23af91"));
                     else if (name.ToLower().Contains("gate.io"))
                         lab.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#17e6a1"));
-                    else if (name.ToLower().Contains("huobi"))
+                    else if (name.ToLower().Contains("htx"))
                         lab.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#008fdd"));
                     else if (name.ToLower().Contains("bitget"))
                         lab.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1ea1b4"));
@@ -453,7 +456,9 @@ namespace CryptoWPFX
         {
             var icon = sender as FontAwesome.WPF.FontAwesome;
             // Открываем ссылку в браузере
-            System.Diagnostics.Process.Start(icon.GetValue(AutomationProperties.AutomationIdProperty).ToString());
+            ProcessStartInfo sInfo = new ProcessStartInfo(icon.GetValue(AutomationProperties.AutomationIdProperty).ToString());
+            Process.Start(sInfo);
+            //Process.Start(icon.GetValue(AutomationProperties.AutomationIdProperty).ToString());
         }
 
         // кнопка для просмотра курса токена в других валютах
@@ -468,7 +473,7 @@ namespace CryptoWPFX
                 {
                     ConvertTokenPrice.Children.Add(new System.Windows.Controls.Label
                     {
-                        Content = $"{property.Value.GetDouble()} {property.Name.ToUpper()}",
+                        Content = $"{InsertSeparator(property.Value.GetDouble().ToString())} {property.Name.ToUpper()}",
                         HorizontalAlignment = HorizontalAlignment.Center,
                         Foreground = Brushes.White
                     });
@@ -531,7 +536,7 @@ namespace CryptoWPFX
                 {
                     ConvertTokenPrice.Children.Add(new System.Windows.Controls.Label
                     {
-                        Content = $"{property.Value.GetDouble()} {property.Name.ToUpper()}",
+                        Content = $"{InsertSeparator(property.Value.GetDouble().ToString())} {property.Name.ToUpper()}",
                         HorizontalAlignment = HorizontalAlignment.Center,
                         Foreground = Brushes.White
                     });
