@@ -1,25 +1,17 @@
-﻿using CryptoWPFX.Model;
+﻿using CryptoWPFX.Class;
+using CryptoWPFX.Model;
 using CryptoWPFX.Model.API;
 using SciChart.Charting.Model.DataSeries;
 using SciChart.Core.Extensions;
 using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Security.Policy;
-using System.Text;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using static CryptoWPFX.Model.API.CoinGeckoApi;
 
 namespace CryptoWPFX
@@ -27,6 +19,8 @@ namespace CryptoWPFX
     
     public partial class MainWindow : Window
     {
+        SQLiteDB SQL = new SQLiteDB();
+
         string TokenActiveID = "";
         private CoinGeckoApi coinGeckoAPI = new CoinGeckoApi();
         private List<CryptoCurrency> topCurrencies = new List<CryptoCurrency>();
@@ -35,7 +29,6 @@ namespace CryptoWPFX
         public MainWindow()
         {
             InitializeComponent();
-            //Properties.Settings.Default
         }
         static string InsertSeparator(string input)
         {
@@ -267,9 +260,17 @@ namespace CryptoWPFX
                     lbl.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFA8A8A8"));
                 }
             }
-
+            if (SQL.GetListFavorites().Contains(TokenID))
+            {
+                FavoriteStar.Icon = FontAwesome.WPF.FontAwesomeIcon.Star;
+            }
+            else
+            {
+                FavoriteStar.Icon = FontAwesome.WPF.FontAwesomeIcon.StarOutline;
+            }
             //try
-            //{
+            //{ 
+
                 NameToken.Content = InfoToken[CoinGeckoApi.CoinField.Name.ToString().ToLower()].ToString().ToUpper();
                 SymbolToken.Content = InfoToken[CoinGeckoApi.CoinField.Symbol.ToString().ToLower()].ToString().ToUpper();
                 PrecentToken.Content = $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_24h.ToString().ToLower()].ToString().Replace(".", ",")), 2)}%";
@@ -293,8 +294,9 @@ namespace CryptoWPFX
                 bitmap.EndInit();
 
                 LogoToken.Source = bitmap;
-                //MaxPriceToken.Content = InsertSeparator(InfoToken[CoinGeckoApi.CoinField.High_24h.ToString().ToLower()].ToString());
-                //MinPriceToken.Content = InsertSeparator(InfoToken[CoinGeckoApi.CoinField.Low_24h.ToString().ToLower()].ToString());
+                MaxPriceToken.Content = InsertSeparator(InfoToken[CoinGeckoApi.CoinField.High_24h.ToString().ToLower()].ToString());
+                MinPriceToken.Content = InsertSeparator(InfoToken[CoinGeckoApi.CoinField.Low_24h.ToString().ToLower()].ToString());
+                ATHToken.Content = "ATH: " + InsertSeparator(InfoToken[CoinGeckoApi.CoinField.Ath.ToString().ToLower()].ToString());
                 VolumeToken.Content = AbbreviateNumber(InfoToken[CoinGeckoApi.CoinField.Market_Cap.ToString().ToLower()].ToString());
 
                 Percent_1h.Content = InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_1h_In_Currency.ToString().ToLower()] == null ? "X" : $"{Math.Round(Convert.ToDouble(InfoToken[CoinGeckoApi.CoinField.Price_Change_Percentage_1h_In_Currency.ToString().ToLower()].ToString().Replace(".", ",")), 2)}%";
@@ -669,6 +671,48 @@ namespace CryptoWPFX
 
 
             DataGrid.ItemsSource = top;
+        }
+
+        private async void Click_Favorites(object sender, MouseButtonEventArgs e)
+        {
+            FontAwesome.WPF.FontAwesome? icon = sender as FontAwesome.WPF.FontAwesome;
+            var token = await CoinGeckoApi.GetInfoTokenToID(TokenActiveID, "usd");
+            if (icon.Icon == FontAwesome.WPF.FontAwesomeIcon.StarOutline)
+            {
+                icon.Icon = FontAwesome.WPF.FontAwesomeIcon.Star;
+
+                //// Создаем новую анимацию поворота
+                DoubleAnimation FontSizeAnimation = new DoubleAnimation
+                {
+                    From = 30, // Начальный угол поворота (в градусах)
+                    To = 40, // Конечный угол поворота (в градусах)
+                    Duration = TimeSpan.FromMilliseconds(200),
+                    AutoReverse = true
+                };
+
+                // Запускаем анимацию
+                icon.BeginAnimation(TextBlock.FontSizeProperty, FontSizeAnimation);
+
+                SQL.AddFavorites(token[CoinGeckoApi.CoinField.Id.ToString().ToLower()].ToString());
+            }
+            else if (icon.Icon == FontAwesome.WPF.FontAwesomeIcon.Star)
+            {
+                icon.Icon = FontAwesome.WPF.FontAwesomeIcon.StarOutline;
+
+                //// Создаем новую анимацию поворота
+                DoubleAnimation FontSizeAnimation = new DoubleAnimation
+                {
+                    From = 30, // Начальный угол поворота (в градусах)
+                    To = 40, // Конечный угол поворота (в градусах)
+                    Duration = TimeSpan.FromMilliseconds(200),
+                    AutoReverse = true
+                };
+
+                // Запускаем анимацию
+                icon.BeginAnimation(TextBlock.FontSizeProperty, FontSizeAnimation);
+
+                SQL.DelFavorites(token[CoinGeckoApi.CoinField.Id.ToString().ToLower()].ToString());
+            }
         }
     }
 }

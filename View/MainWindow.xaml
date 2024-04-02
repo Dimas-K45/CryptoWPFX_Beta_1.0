@@ -414,10 +414,10 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Image x:Name="LogoToken" Source="https://assets.coingecko.com/coins/images/1/large/bitcoin.png?1696501400" Width="40" />
-                        <Label x:Name="NameToken" Grid.Column="1" Content="NameCrypto" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="24" Foreground="#FFDEDEDE"/>
-                        <Label x:Name="SymbolToken" Padding="0" Grid.Column="2" Content="ETHFI" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="20" Foreground="#FFDEDEDE" FontWeight="Bold"/>
+                        <Label x:Name="NameToken" Grid.ColumnSpan="2" Grid.Column="1" Content="NameCrypto" HorizontalAlignment="Left" Padding="0" VerticalAlignment="Top" FontSize="14" Foreground="#FFB0B0B0"/>
+                        <Label x:Name="SymbolToken" Grid.ColumnSpan="2" Grid.Column="1" Content="ETHFI" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="20" Foreground="#FFDEDEDE" FontWeight="Bold"/>
                         
-                        <Label x:Name="PrecentToken" Grid.Column="3" Content="+1000%" HorizontalAlignment="Left" VerticalAlignment="Center" FontFamily="Arial Black" FontSize="24" Foreground="#FF00FF03"/>
+                        <Label x:Name="PrecentToken" Grid.Column="3" Content="+1000%" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Arial Black" FontSize="24" Foreground="#FF00FF03"/>
                         <Grid Grid.Column="4">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*"/>
@@ -443,7 +443,7 @@
                             <Label x:Name="VolumeToken" Grid.Row="1" Content="11 100 0000 000" HorizontalAlignment="Center" Foreground="#FFE7E7E7"/>
                         </Grid>
 
-                        <fa:FontAwesome Grid.Column="7" Icon="StarOutline" FontSize="30" VerticalAlignment="Center" Foreground="#FF5C008A"/>
+                        <fa:FontAwesome x:Name="FavoriteStar" MouseDown="Click_Favorites" Grid.Column="7" Icon="StarOutline" FontSize="30" VerticalAlignment="Center" Foreground="#FFB0B0B0"/>
                     </Grid>
                 </Grid>
 
@@ -461,9 +461,14 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="3*"/>
                         </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="2*"/>
+                        </Grid.RowDefinitions>
 
-                        <Label x:Name="PriceToken" Content="100 000" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="40" Foreground="#FFFFB500" />
-                        <Label Grid.Column="2" Content="USD▾" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="20" Foreground="#FFB1B1B1" MouseDown="Click_ConvertTokenPrice"/>
+                        <Label x:Name="ATHToken" HorizontalContentAlignment="Right" Content="ATH: 73000" VerticalAlignment="Bottom" Foreground="#FFFFDD00" FontWeight="DemiBold" FontSize="16" />
+                        <Label Grid.Row="1" x:Name="PriceToken" Content="100 000" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="40" Foreground="#FFFFB500" FontWeight="Bold" />
+                        <Label Grid.Row="1" Grid.Column="2" Content="USD▾" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="20" Foreground="#FFB1B1B1" MouseDown="Click_ConvertTokenPrice"/>
 
                     </Grid>
 
