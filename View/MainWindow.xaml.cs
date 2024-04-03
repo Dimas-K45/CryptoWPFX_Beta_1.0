@@ -188,7 +188,7 @@ namespace CryptoWPFX
         private void borderClickDataGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
             DataGrid.Visibility = Visibility.Visible;
-            DataGridMainPoolCrypto.Visibility = Visibility.Collapsed;
+            DataGridFavorites.Visibility = Visibility.Collapsed;
             ConverterCoin.Visibility = Visibility.Collapsed;
             borderHeaderDataGrid.Visibility = Visibility.Visible;
             borderClickDataGrid.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E00AC"));
@@ -196,21 +196,28 @@ namespace CryptoWPFX
             borderConverterCoin.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
         }
 
-        private void borderClickDataGridMainPoolCrypto_MouseDown(object sender, MouseButtonEventArgs e)
+        private async void borderClickDataGridMainPoolCrypto_MouseDown(object sender, MouseButtonEventArgs e)
         {
             DataGrid.Visibility = Visibility.Collapsed;
-            DataGridMainPoolCrypto.Visibility = Visibility.Visible;
-            ConverterCoin.Visibility = Visibility.Collapsed;
-            borderHeaderDataGrid.Visibility = Visibility.Visible;
+            ScrolFavorites.Visibility = Visibility.Visible;
             borderClickDataGrid.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
             borderClickDataGridMainPoolCrypto.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E00AC"));
             borderConverterCoin.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
+
+            Coin[] list = await CoinGeckoApi.GetTokensInfoToIDs(new List<string> { "bitcoin", "binancecoin" });
+            List<Coin> lists = list.ToList();
+
+            DataGridFavorites.ItemsSource = lists;
+            //foreach (Coin coin in lists)
+            //{
+            //    tt.Text = tt.Text + " " + coin.Id;
+            //}
         }
 
         private void borderConverterCoin_MouseDown(object sender, MouseButtonEventArgs e)
         {
             DataGrid.Visibility = Visibility.Collapsed;
-            DataGridMainPoolCrypto.Visibility = Visibility.Collapsed;
+            DataGridFavorites.Visibility = Visibility.Collapsed;
             ConverterCoin.Visibility = Visibility.Visible;
             borderHeaderDataGrid.Visibility = Visibility.Collapsed;
             borderClickDataGrid.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
@@ -249,15 +256,21 @@ namespace CryptoWPFX
             TokenView.Visibility = Visibility.Visible;
             var InfoToken = await CoinGeckoApi.GetInfoTokenToID(TokenID, "usd");
 
-            foreach (System.Windows.Controls.Label lbl in TimeSetChartPanel.Children)
+
+
+            foreach (UIElement lbl in TimeSetChartPanel.Children)
             {
-                if (lbl.Content.ToString() == "1 день")
+                if (lbl is Label)
                 {
-                    lbl.Foreground = Brushes.White;
-                }
-                else
-                {
-                    lbl.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFA8A8A8"));
+                    Label label = lbl as Label;
+                    if (label.Content.ToString() == "1 день")
+                    {
+                        label.Foreground = Brushes.White;
+                    }
+                    else
+                    {
+                        label.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFA8A8A8"));
+                    }
                 }
             }
             if (SQL.GetListFavorites().Contains(TokenID))
@@ -279,8 +292,11 @@ namespace CryptoWPFX
                     PrecentToken.Foreground = Brushes.Red;
                 }
 
-                //построение графика
-                var series = new XyDataSeries<DateTime, double>();
+            mountainRenderSeries.Stroke = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.ColorChartLine);
+            ColorPickerLine.SelectedColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.ColorChartLine);
+            
+            //построение графика
+            var series = new XyDataSeries<DateTime, double>();
                 series = await CoinGeckoApi.GetActualChartToken(TokenID, "usd", "1");
                 mountainRenderSeries.DataSeries = series;
                 ChartToken.AnimateZoomExtentsCommand.Execute(null);
@@ -432,7 +448,6 @@ namespace CryptoWPFX
             //    MainView.Visibility = Visibility.Visible;
             //}
 
-            
         }
 
         // анимация при наведении на кнопку для перехода на биржу
@@ -499,15 +514,20 @@ namespace CryptoWPFX
         private async void Click_TimeSetChart(object sender, MouseButtonEventArgs e)
         {
             System.Windows.Controls.Label label = sender as System.Windows.Controls.Label;
-            foreach (System.Windows.Controls.Label lbl in TimeSetChartPanel.Children)
+            
+            foreach (UIElement lbl in TimeSetChartPanel.Children)
             {
-                if (label.Content.ToString() == lbl.Content.ToString())
+                if (lbl is Label)
                 {
-                    lbl.Foreground = Brushes.White;
-                }
-                else
-                {
-                    lbl.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFA8A8A8"));
+                    Label lab = lbl as Label;
+                    if (label.Content.ToString() == lab.Content.ToString())
+                    {
+                        lab.Foreground = Brushes.White;
+                    }
+                    else
+                    {
+                        lab.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFA8A8A8"));
+                    }
                 }
             }
             string[] strings = label.Content.ToString().Split(' ');
@@ -669,7 +689,6 @@ namespace CryptoWPFX
                 }
             }
 
-
             DataGrid.ItemsSource = top;
         }
 
@@ -712,6 +731,61 @@ namespace CryptoWPFX
                 icon.BeginAnimation(TextBlock.FontSizeProperty, FontSizeAnimation);
 
                 SQL.DelFavorites(token[CoinGeckoApi.CoinField.Id.ToString().ToLower()].ToString());
+            }
+        }
+
+        private void ColorPickerLine_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (ColorPickerLine != null && ColorPickerLine.SelectedColor != null && mountainRenderSeries != null)
+            {
+                mountainRenderSeries.Stroke = (Color)ColorPickerLine.SelectedColor;
+                Properties.Settings.Default.ColorChartLine = ColorPickerLine.SelectedColor.ToString();
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        private void FavoriteStar_MouseEnter(object sender, MouseEventArgs e)
+        {
+            var star = sender as FontAwesome.WPF.FontAwesome;
+            if (star.Icon == FontAwesome.WPF.FontAwesomeIcon.StarOutline)
+            {
+                star.Icon = FontAwesome.WPF.FontAwesomeIcon.Star;
+            }
+            else
+            {
+                star.Icon = FontAwesome.WPF.FontAwesomeIcon.StarOutline;
+            }
+        }
+
+        private void FavoriteStar_MouseLeave(object sender, MouseEventArgs e)
+        {
+            var star = sender as FontAwesome.WPF.FontAwesome;
+            if (star.Icon == FontAwesome.WPF.FontAwesomeIcon.StarOutline)
+            {
+                star.Icon = FontAwesome.WPF.FontAwesomeIcon.Star;
+            }
+            else
+            {
+                star.Icon = FontAwesome.WPF.FontAwesomeIcon.StarOutline;
+            }
+        }
+
+        private void borderClickDataGrid_MouseEnter(object sender, MouseEventArgs e)
+        {
+            Border border = sender as Border;
+            if (border.Background == new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E00AC")))
+            {
+                
+            }
+            else { border.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF5203B0")); }
+        }
+
+        private void borderClickDataGrid_MouseLeave(object sender, MouseEventArgs e)
+        {
+            Border border = sender as Border;
+            if (border.Background != new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E00AC")))
+            {
+                border.Background = Brushes.Transparent;
             }
         }
     }
