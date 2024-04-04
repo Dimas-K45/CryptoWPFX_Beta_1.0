@@ -24,6 +24,7 @@ namespace CryptoWPFX
         string TokenActiveID = "";
         private CoinGeckoApi coinGeckoAPI = new CoinGeckoApi();
         private List<CryptoCurrency> topCurrencies = new List<CryptoCurrency>();
+        List<Coin> ListFavoritesCrypto = new List<Coin>();
 
         JsonElement ConvertCurrencyToken;
         public MainWindow()
@@ -108,9 +109,30 @@ namespace CryptoWPFX
             {
                 // Получаем список топ N криптовалют
                 topCurrencies = await coinGeckoAPI.GetTopNCurrenciesAsync(500, 1);
-
+                foreach (CryptoCurrency currencies in topCurrencies)
+                {
+                    if (currencies.price_change_percentage_24h <= 0)
+                    {
+                        currencies.ColorPercettage = Brushes.Red;
+                    }
+                    else
+                    {
+                        currencies.ColorPercettage = Brushes.LimeGreen;
+                    }
+                }
                 // Привязываем список к DataGrid
                 DataGrid.ItemsSource = topCurrencies;
+
+                Coin[] list = await CoinGeckoApi.GetTokensInfoToIDs(SQL.GetListFavorites());
+                foreach (Coin coin in list)
+                {
+                    if (coin.Price_Change_Percentage_24h_In_Currency < 0)
+                    {
+                        coin.colorPrice = Brushes.Red;
+                    }
+                    ListFavoritesCrypto.Add(coin);
+                }
+                DataGridFavorites.ItemsSource = ListFavoritesCrypto;
             }
             catch (Exception ex)
             {
@@ -187,31 +209,37 @@ namespace CryptoWPFX
 
         private void borderClickDataGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            DataGrid.Visibility = Visibility.Visible;
-            DataGridFavorites.Visibility = Visibility.Collapsed;
+            MainScrolCrypto.Visibility = Visibility.Visible;
+            ScrolFavorites.Visibility = Visibility.Collapsed;
             ConverterCoin.Visibility = Visibility.Collapsed;
-            borderHeaderDataGrid.Visibility = Visibility.Visible;
             borderClickDataGrid.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E00AC"));
             borderClickDataGridMainPoolCrypto.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
             borderConverterCoin.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
+
+            if (borderClickDataGrid.Child is FontAwesome.WPF.ImageAwesome font && borderClickDataGridMainPoolCrypto.Child is FontAwesome.WPF.ImageAwesome font2 && borderConverterCoin.Child is FontAwesome.WPF.ImageAwesome font3)
+            {
+                font.Foreground = Brushes.White;
+                font2.Foreground = Brushes.Black;
+                font3.Foreground = Brushes.Black;
+            }
+
         }
 
         private async void borderClickDataGridMainPoolCrypto_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            DataGrid.Visibility = Visibility.Collapsed;
+            MainScrolCrypto.Visibility = Visibility.Collapsed;
             ScrolFavorites.Visibility = Visibility.Visible;
+            ConverterCoin.Visibility = Visibility.Collapsed;
             borderClickDataGrid.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
             borderClickDataGridMainPoolCrypto.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E00AC"));
             borderConverterCoin.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
 
-            Coin[] list = await CoinGeckoApi.GetTokensInfoToIDs(new List<string> { "bitcoin", "binancecoin" });
-            List<Coin> lists = list.ToList();
-
-            DataGridFavorites.ItemsSource = lists;
-            //foreach (Coin coin in lists)
-            //{
-            //    tt.Text = tt.Text + " " + coin.Id;
-            //}
+            if (borderClickDataGrid.Child is FontAwesome.WPF.ImageAwesome font && borderClickDataGridMainPoolCrypto.Child is FontAwesome.WPF.ImageAwesome font2 && borderConverterCoin.Child is FontAwesome.WPF.ImageAwesome font3)
+            {
+                font.Foreground = Brushes.Black;
+                font2.Foreground = Brushes.White;
+                font3.Foreground = Brushes.Black;
+            }
         }
 
         private void borderConverterCoin_MouseDown(object sender, MouseButtonEventArgs e)
@@ -223,6 +251,13 @@ namespace CryptoWPFX
             borderClickDataGrid.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
             borderClickDataGridMainPoolCrypto.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
             borderConverterCoin.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E00AC"));
+
+            if (borderClickDataGrid.Child is FontAwesome.WPF.ImageAwesome font && borderClickDataGridMainPoolCrypto.Child is FontAwesome.WPF.ImageAwesome font2 && borderConverterCoin.Child is FontAwesome.WPF.ImageAwesome font3)
+            {
+                font.Foreground = Brushes.Black;
+                font2.Foreground = Brushes.Black;
+                font3.Foreground = Brushes.White;
+            }
         }
 
         // поиск криптовалют
@@ -587,22 +622,26 @@ namespace CryptoWPFX
         {
             var SortText = sender as TextBlock;
             var top = new List<CryptoCurrency>();
+            var ListFavorites = ListFavoritesCrypto;
 
             if (SortText.Text.Split(" ")[0] == "Цена")
             {
                 if (SortText.Text[SortText.Text.Length - 1] == '●')
                 {
                     top = topCurrencies.OrderByDescending(c => c.Price).ToList();
+                    ListFavorites = ListFavoritesCrypto.OrderByDescending(c => c.current_price).ToList();
                     SortText.Text = "Цена ▽";
                 }
                 else if (SortText.Text[SortText.Text.Length - 1] == '▽')
                 {
                     top = topCurrencies.OrderBy(c => c.Price).ToList();
+                    ListFavorites = ListFavoritesCrypto.OrderBy(c => c.current_price).ToList();
                     SortText.Text = "Цена △";
                 }
                 else if (SortText.Text[SortText.Text.Length - 1] == '△')
                 {
                     top = topCurrencies;
+                    ListFavorites = ListFavoritesCrypto;
                     SortText.Text = "Цена ●";
                 }
                 foreach (TextBlock item in GridNameDataGridColumn.Children)
@@ -618,16 +657,19 @@ namespace CryptoWPFX
                 if (SortText.Text[SortText.Text.Length - 1] == '●')
                 {
                     top = topCurrencies.OrderByDescending(c => c.Name).ToList();
+                    ListFavorites = ListFavorites.OrderByDescending(c => c.Name).ToList();
                     SortText.Text = "Название ▽";
                 }
                 else if (SortText.Text[SortText.Text.Length - 1] == '▽')
                 {
                     top = topCurrencies.OrderBy(c => c.Name).ToList();
+                    ListFavorites = ListFavorites.OrderBy(c => c.Name).ToList();
                     SortText.Text = "Название △";
                 }
                 else if (SortText.Text[SortText.Text.Length - 1] == '△')
                 {
                     top = topCurrencies;
+                    ListFavorites = ListFavoritesCrypto;
                     SortText.Text = "Название ●";
                 }
                 foreach (TextBlock item in GridNameDataGridColumn.Children)
@@ -643,16 +685,19 @@ namespace CryptoWPFX
                 if (SortText.Text[SortText.Text.Length - 1] == '●')
                 {
                     top = topCurrencies.OrderByDescending(c => c.Symbol).ToList();
+                    ListFavorites = ListFavorites.OrderByDescending(c => c.Symbol).ToList();
                     SortText.Text = "Символы ▽";
                 }
                 else if (SortText.Text[SortText.Text.Length - 1] == '▽')
                 {
                     top = topCurrencies.OrderBy(c => c.Symbol).ToList();
+                    ListFavorites = ListFavorites.OrderBy(c => c.Symbol).ToList();
                     SortText.Text = "Символы △";
                 }
                 else if (SortText.Text[SortText.Text.Length - 1] == '△')
                 {
                     top = topCurrencies;
+                    ListFavorites = ListFavoritesCrypto;
                     SortText.Text = "Символы ●";
                 }
                 foreach (TextBlock item in GridNameDataGridColumn.Children)
@@ -668,16 +713,19 @@ namespace CryptoWPFX
                 if (SortText.Text[SortText.Text.Length - 1] == '●')
                 {
                     top = topCurrencies.OrderByDescending(c => c.Volume).ToList();
+                    ListFavorites = ListFavorites.OrderByDescending(c => c.Market_Cap_Change_24h).ToList();
                     SortText.Text = "Объем торгов 24ч ▽";
                 }
                 else if (SortText.Text[SortText.Text.Length - 1] == '▽')
                 {
                     top = topCurrencies.OrderBy(c => c.Volume).ToList();
+                    ListFavorites = ListFavorites.OrderBy(c => c.Market_Cap_Change_24h).ToList();
                     SortText.Text = "Объем торгов 24ч △";
                 }
                 else if (SortText.Text[SortText.Text.Length - 1] == '△')
                 {
                     top = topCurrencies;
+                    ListFavorites = ListFavoritesCrypto;
                     SortText.Text = "Объем торгов 24ч ●";
                 }
                 foreach (TextBlock item in GridNameDataGridColumn.Children)
@@ -688,8 +736,40 @@ namespace CryptoWPFX
                     }
                 }
             }
-
+            else if (SortText.Text.Split(" ")[0] == "Проценты")
+            {
+                if (SortText.Text[SortText.Text.Length - 1] == '●')
+                {
+                    top = topCurrencies.OrderByDescending(c => c.price_change_percentage_24h).ToList();
+                    ListFavorites = ListFavorites.OrderByDescending(c => c.Price_Change_Percentage_24h_In_Currency).ToList();
+                    SortText.Text = "Проценты 24ч ▽";
+                }
+                else if (SortText.Text[SortText.Text.Length - 1] == '▽')
+                {
+                    top = topCurrencies.OrderBy(c => c.price_change_percentage_24h).ToList();
+                    ListFavorites = ListFavorites.OrderBy(c => c.Price_Change_Percentage_24h_In_Currency).ToList();
+                    SortText.Text = "Проценты 24ч △";
+                }
+                else if (SortText.Text[SortText.Text.Length - 1] == '△')
+                {
+                    top = topCurrencies;
+                    ListFavorites = ListFavoritesCrypto;
+                    SortText.Text = "Проценты 24ч ●";
+                }
+                foreach (TextBlock item in GridNameDataGridColumn.Children)
+                {
+                    if (item.Text.Split()[0] != "Проценты" && item.Text.Split()[0] != "Монета" && item.Text.Split()[0] != "Переход")
+                    {
+                        item.Text = item.Text.Replace(item.Text.ToCharArray()[item.Text.Length - 1], '●');
+                    }
+                }
+            }
+            
             DataGrid.ItemsSource = top;
+            if (ListFavoritesCrypto.Count > 0)
+            {
+                DataGridFavorites.ItemsSource = ListFavorites;
+            }
         }
 
         private async void Click_Favorites(object sender, MouseButtonEventArgs e)
@@ -773,9 +853,10 @@ namespace CryptoWPFX
         private void borderClickDataGrid_MouseEnter(object sender, MouseEventArgs e)
         {
             Border border = sender as Border;
-            if (border.Background == new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E00AC")))
+            SolidColorBrush expectedColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E00AC"));
+            if (border.Background is SolidColorBrush && ((SolidColorBrush)border.Background).Color == expectedColor.Color)
             {
-                
+                // Ваш код здесь
             }
             else { border.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF5203B0")); }
         }
@@ -783,10 +864,12 @@ namespace CryptoWPFX
         private void borderClickDataGrid_MouseLeave(object sender, MouseEventArgs e)
         {
             Border border = sender as Border;
-            if (border.Background != new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E00AC")))
+            SolidColorBrush expectedColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E00AC"));
+            if (border.Background is SolidColorBrush && ((SolidColorBrush)border.Background).Color != expectedColor.Color)
             {
                 border.Background = Brushes.Transparent;
             }
+            
         }
     }
 }

@@ -10,6 +10,7 @@ using RestSharp;
 using SciChart.Charting.Model.DataSeries;
 using System.Text.Json;
 using System.Windows;
+using System.Windows.Media;
 
 namespace CryptoWPFX.Model.API
 {
@@ -341,38 +342,45 @@ namespace CryptoWPFX.Model.API
 
         public class Coin
         {
-            public string Id { get; set; }
-            public string Symbol { get; set; }
-            public string Name { get; set; }
-            public string Image { get; set; }
-            public double current_price { get; set; }
-            public long Market_Cap { get; set; }
-            public int Market_Cap_Rank { get; set; }
-            public long Fully_Diluted_Valuation { get; set; }
-            public long Total_Volume { get; set; }
-            public double High_24h { get; set; }
-            public double Low_24h { get; set; }
-            public double Price_Change_24h { get; set; }
-            public double Price_Change_Percentage_24h { get; set; }
-            public long Market_Cap_Change_24h { get; set; }
-            public double Market_Cap_Change_Percentage_24h { get; set; }
-            public long Circulating_Supply { get; set; }
-            public long Total_Supply { get; set; }
-            public long Max_Supply { get; set; }
+            public string? Id { get; set; }
+            public string? Symbol { get; set; }
+            public string? Name { get; set; }
+            public string? Image { get; set; }
+            public double? current_price { get; set; }
+            public long? Market_Cap { get; set; }
+            public int? Market_Cap_Rank { get; set; }
+            public long? Fully_Diluted_Valuation { get; set; }
+            public long? Total_Volume { get; set; }
+            public double? High_24h { get; set; }
+            public double? Low_24h { get; set; }
+            public double? Price_Change_24h { get; set; }
+            public double? Price_Change_Percentage_24h { get; set; }
+            public long? Market_Cap_Change_24h { get; set; }
+            public double? Market_Cap_Change_Percentage_24h { get; set; }
+            public long? Circulating_Supply { get; set; }
+            public long? Total_Supply { get; set; }
+            public long? Max_Supply { get; set; }
             public double Ath { get; set; }
-            public double Ath_Change_Percentage { get; set; }
-            public DateTime Ath_Date { get; set; }
-            public double Atl { get; set; }
-            public double Atl_Change_Percentage { get; set; }
-            public DateTime Atl_Date { get; set; }
-            public object Roi { get; set; }
-            public DateTime Last_Updated { get; set; }
-            public double price_change_percentage_14d_in_currency { get; set; }
-            public double Price_Change_Percentage_1h_In_Currency { get; set; }
-            public double Price_Change_Percentage_1y_In_Currency { get; set; }
-            public double Price_Change_Percentage_24h_In_Currency { get; set; }
-            public double Price_Change_Percentage_30d_In_Currency { get; set; }
-            public double Price_Change_Percentage_7d_In_Currency { get; set; }
+            public double? Ath_Change_Percentage { get; set; }
+            public DateTime? Ath_Date { get; set; }
+            public double? Atl { get; set; }
+            public double? Atl_Change_Percentage { get; set; }
+            public DateTime? Atl_Date { get; set; }
+            public object? Roi { get; set; }
+            public DateTime? Last_Updated { get; set; }
+            public double? price_change_percentage_14d_in_currency { get; set; }
+            public double? Price_Change_Percentage_1h_In_Currency { get; set; }
+            public double? Price_Change_Percentage_1y_In_Currency { get; set; }
+            public double? Price_Change_Percentage_24h_In_Currency { get; set; }
+            public double? Price_Change_Percentage_30d_In_Currency { get; set; }
+            public double? Price_Change_Percentage_7d_In_Currency { get; set; }
+
+            public SolidColorBrush colorPrice { get; set; }
+
+            public Coin()
+            {
+                colorPrice = Brushes.LimeGreen;
+            }
         }
     }
 }
