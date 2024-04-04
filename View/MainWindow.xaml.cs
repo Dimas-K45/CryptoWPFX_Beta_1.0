@@ -937,7 +937,7 @@ namespace CryptoWPFX
             {
                 MessageBox.Show("Please select currencies.");
                 return;
-            }
+            }//
             CryptoCurrency fromCurrency = (CryptoCurrency)cmbFromCurrency.SelectedItem;
             CryptoCurrency toCurrency = (CryptoCurrency)cmbToCurrency.SelectedItem;
 
