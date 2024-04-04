@@ -31,12 +31,19 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="5"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <!-- Кнопка для закрытия приложения -->
-                    <Border Grid.Column="2" Style="{StaticResource moveCursorInBorderClose}" Cursor="Hand" MouseDown="ScreenClose_Click" Width="20" Height="20" CornerRadius="30" />
+                    <Border Grid.Column="0" Style="{StaticResource moveCursorInBorderHideScreen}" Cursor="Hand" MouseDown="ScrennHide_Click" Width="20" Height="20" CornerRadius="30"/>
                     <Border Grid.Column="1"/>
-                    <!-- Кнопка для открытия на весь экран и наоборот -->
-                    <Border Grid.Column="0" Style="{StaticResource moveCursorInBorderFullScreen}" Cursor="Hand" MouseDown="FullScreenButton_Click" Width="20" Height="20" CornerRadius="30"/>
+                    <!--Кнопка чтобы развернуть на весь экран и наоборот-->
+                    <Border Grid.Column="2" Style="{StaticResource moveCursorInBorderFullScreen}" Cursor="Hand" MouseDown="FullScreenButton_Click" Width="20" Height="20" CornerRadius="30"/>
+                    <Border Grid.Column="3"/>
+                    <!-- Кнопка для закрытия приложения -->
+                    <Border Grid.Column="4" Style="{StaticResource moveCursorInBorderClose}" Cursor="Hand" MouseDown="ScreenClose_Click" Width="20" Height="20" CornerRadius="30" />
+
+                    <!-- Добавленная таблица DataGrid -->
                 </Grid>
 
                 <!-- Добавленная таблица DataGrid -->
@@ -48,8 +55,8 @@
                     </Grid.RowDefinitions>
 
                     <!--Поиск монеты-->
-                    <Border Grid.Row="0" HorizontalAlignment="Center" CornerRadius="10" Width="900" Height="45" BorderBrush="DarkBlue" BorderThickness="2">
-                        <TextBox TextChanged="coinInput_TextChanged" Padding="8,8,8,5" x:Name="coinInput" CaretBrush="White" VerticalAlignment="Center" HorizontalAlignment="Center"  FontSize="18" Width="900" Height="40" Foreground="#fff" BorderThickness="0" Background="Transparent" />
+                    <Border x:Name="borderCoinInput" Grid.Row="0" HorizontalAlignment="Center" CornerRadius="10" Width="850" Height="45" BorderBrush="DarkBlue" BorderThickness="2">
+                        <TextBox TextChanged="coinInput_TextChanged" Padding="8,8,8,5" x:Name="coinInput" CaretBrush="White" VerticalAlignment="Center" HorizontalAlignment="Center"  FontSize="18" Width="850" Height="40" Foreground="#fff" BorderThickness="0" Background="Transparent" />
                     </Border>
 
                     <Border x:Name="borderHeaderDataGrid" Background="#192038" Padding="16,10,5,10" Margin="0,155,0,0" CornerRadius="10">
@@ -75,20 +82,20 @@
                     <!-- Основной DataGrid с криптой -->
                     <ScrollViewer PreviewMouseWheel="ScrollViewer_PreviewMouseWheel"  Grid.Row="2" VerticalScrollBarVisibility="Hidden" Margin="0,10,0,0">
                         <DataGrid x:Name="DataGrid"
-      CanUserAddRows="False"
-      IsReadOnly="True"
-      AutoGenerateColumns="False"
-      VirtualizingPanel.IsVirtualizing="True"
-      RowBackground="Transparent"
-      BorderThickness="1"
-      BorderBrush="#7163ba"
-      Background="#000A17"
-      HeadersVisibility="Column"
-      ColumnHeaderHeight="10"
-      RowHeight="50"
-      GridLinesVisibility="None"
-      Foreground="#fff"
-      VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                          CanUserAddRows="False"
+                          IsReadOnly="True"
+                          AutoGenerateColumns="False"
+                          VirtualizingPanel.IsVirtualizing="True"
+                          RowBackground="Transparent"
+                          BorderThickness="1"
+                          BorderBrush="#7163ba"
+                          Background="#000A17"
+                          HeadersVisibility="Column"
+                          ColumnHeaderHeight="10"
+                          RowHeight="50"
+                          GridLinesVisibility="None"
+                          Foreground="#fff"
+                          VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
 
                             <!-- Cтили для header -->
                             <DataGrid.ColumnHeaderStyle>
@@ -170,20 +177,20 @@
                     <!--Второй DataGrid избранные монеты-->
                     <ScrollViewer PreviewMouseWheel="ScrollViewer_PreviewMouseWheel"  Grid.Row="1" VerticalScrollBarVisibility="Hidden" Margin="0,10,0,0" Visibility="Collapsed">
                         <DataGrid x:Name="DataGridMainPoolCrypto"
-      CanUserAddRows="False"
-      IsReadOnly="True"
-      AutoGenerateColumns="False"
-      VirtualizingPanel.IsVirtualizing="True"
-      RowBackground="Transparent"
-      BorderThickness="1"
-      BorderBrush="#7163ba"
-      Background="#000A17"
-      HeadersVisibility="Column"
-      ColumnHeaderHeight="10"
-      RowHeight="50"
-      GridLinesVisibility="None"
-      Foreground="#fff"
-      VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                          CanUserAddRows="False"
+                          IsReadOnly="True"
+                          AutoGenerateColumns="False"
+                          VirtualizingPanel.IsVirtualizing="True"
+                          RowBackground="Transparent"
+                          BorderThickness="1"
+                          BorderBrush="#7163ba"
+                          Background="#000A17"
+                          HeadersVisibility="Column"
+                          ColumnHeaderHeight="10"
+                          RowHeight="50"
+                          GridLinesVisibility="None"
+                          Foreground="#fff"
+                          VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
 
                             <!-- Cтили для header -->
                             <DataGrid.ColumnHeaderStyle>
@@ -258,21 +265,14 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-
-                    <TextBlock Text="Cryptocurrency Converter" FontSize="20" FontWeight="Bold" Margin="10" Foreground="White"/>
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10">
-                        <TextBlock Text="Amount: " VerticalAlignment="Center" Foreground="White"/>
-                        <TextBox Text="{Binding Amount, Mode=TwoWay}" Width="100" Margin="5" />
+                    <StackPanel x:Name="ConverterCoins">
+                        <TextBox x:Name="txtAmount" Margin="10" />
+                        <ComboBox x:Name="cmbToCurrency" Margin="10" />
+                        <ComboBox x:Name="cmbFromCurrency" Margin="10" />
+                        <Button x:Name="btnConvert" Content="Convert" Click="btnConvert_Click" Margin="10"/>
+                        <TextBlock x:Name="lblResult" Margin="10" Foreground="#fff"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="10">
-                        <TextBlock Text="Source Currency: " VerticalAlignment="Center" Foreground="White"/>
-                        <ComboBox  ItemsSource="{Binding SupportedCurrencies}" SelectedItem="{Binding SourceCurrency, Mode=TwoWay}" Width="100" Margin="5"/>
-                        <TextBlock Foreground="White" Text="Target Currency: " VerticalAlignment="Center" Margin="10, 0, 0, 0"/>
-                        <ComboBox  ItemsSource="{Binding SupportedCurrencies}" SelectedItem="{Binding TargetCurrency, Mode=TwoWay}" Width="100" Margin="5"/>
-                    </StackPanel>
-
-                    <TextBlock Foreground="White" Text="{Binding ConvertedAmountLabel}" Grid.Row="3" Margin="10" FontWeight="Bold"/>
                 </Grid>
 
 

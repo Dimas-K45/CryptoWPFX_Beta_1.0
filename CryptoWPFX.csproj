@@ -19,4 +19,8 @@
     <PackageReference Include="SciChart" Version="8.3.0.28019" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ViewModel\" />
+  </ItemGroup>
+
 </Project>
