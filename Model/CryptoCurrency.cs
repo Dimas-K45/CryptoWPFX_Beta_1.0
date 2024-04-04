@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace CryptoWPFX.Model
 {
@@ -18,5 +19,9 @@ namespace CryptoWPFX.Model
         public string Symbol { get; set; }
         [JsonProperty("current_price")]
         public decimal Price { get; set; }
+        [JsonProperty("price_change_percentage_24h")]
+        public decimal price_change_percentage_24h { get; set; }
+
+        public SolidColorBrush? ColorPercettage { get; set; }
     }
 }

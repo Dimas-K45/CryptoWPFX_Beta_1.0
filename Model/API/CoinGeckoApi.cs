@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using RestSharp;
 using SciChart.Charting.Model.DataSeries;
 using System.Text.Json;
+using System.Windows;
+using System.Windows.Media;
 
 namespace CryptoWPFX.Model.API
 {
@@ -141,13 +143,15 @@ namespace CryptoWPFX.Model.API
         //xxx//
         public static async Task<List<TickerData>> GetActualBurse(string TokenID)
         {
-            var client = new RestClient("https://api.coingecko.com");
-            var request = new RestRequest($"/api/v3/coins/{TokenID}?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false");
-            var response = await client.ExecuteAsync(request);
+            //var client = new RestClient("https://api.coingecko.com");
+            //var request = new RestRequest($"/api/v3/coins/{TokenID}?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false");
+            var options = new RestClientOptions($"https://api.coingecko.com/api/v3/coins/{TokenID}?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false");
+            var client = new RestClient(options);
+            var request = new RestRequest("");
+            request.AddHeader("x-cg-demo-api-key", Properties.Settings.Default.APIKeyCoinGecko);
+            var response = await client.GetAsync(request);
 
-            
-            try
-            {
+
                 /// Разбор JSON-ответа
                 JsonDocument document = JsonDocument.Parse(response.Content);
                 // Получаем массив "tickers"
@@ -172,17 +176,19 @@ namespace CryptoWPFX.Model.API
                     tickerDataList.Add(tickerData);
                 }
                 return tickerDataList;
-            }
-            catch { return new List<TickerData> { new TickerData { Name = response.Content } }; }
             
         }
 
         public static async Task<JsonElement> GetInfoTokenToIDFull(string TokenID)
         {
-            var client = new RestClient("https://api.coingecko.com");
-            var request = new RestRequest($"/api/v3/coins/{TokenID}?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false");
+            //var client = new RestClient("https://api.coingecko.com");
+            //var request = new RestRequest($"/api/v3/coins/{TokenID}?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false");
+            var options = new RestClientOptions($"https://api.coingecko.com/api/v3/coins/{TokenID}?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false");
+            var client = new RestClient(options);
+            var request = new RestRequest("");
+            request.AddHeader("x-cg-demo-api-key", Properties.Settings.Default.APIKeyCoinGecko);
+            var response = await client.GetAsync(request);
 
-            var response = await client.ExecuteAsync(request);
 
             Console.WriteLine(response.Content);
 
@@ -203,11 +209,13 @@ namespace CryptoWPFX.Model.API
 
         public async static Task<Dictionary<string, object>> GetInfoTokenToID(string TokenID, string cyrrency)
         {
-            var client = new RestClient("https://api.coingecko.com");
-            var request = new RestRequest($"/api/v3/coins/markets?vs_currency={cyrrency}&ids={TokenID}&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=1h%2C24h%2C7d%2C14d%2C30d%2C1y&locale=ru&precision=8");
-
-            var response = await client.ExecuteAsync(request);
-
+            //var client = new RestClient("https://api.coingecko.com");
+            //var request = new RestRequest($"/api/v3/coins/markets?vs_currency={cyrrency}&ids={TokenID}&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=1h%2C24h%2C7d%2C14d%2C30d%2C1y&locale=ru&precision=8");
+            var options = new RestClientOptions($"https://api.coingecko.com/api/v3/coins/markets?vs_currency={cyrrency}&ids={TokenID}&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=1h%2C24h%2C7d%2C14d%2C30d%2C1y&locale=ru&precision=8");
+            var client = new RestClient(options);
+            var request = new RestRequest("");
+            request.AddHeader("x-cg-demo-api-key", Properties.Settings.Default.APIKeyCoinGecko);
+            var response = await client.GetAsync(request);
 
             string content = response.Content.Trim();
             if (content.StartsWith("[") && content.EndsWith("]"))
@@ -270,10 +278,14 @@ namespace CryptoWPFX.Model.API
 
         public static async Task<XyDataSeries<DateTime, double>> GetActualChartToken(string TokenID, string currency, string Days)
         {
-            var client = new RestClient("https://api.coingecko.com");
-            var request = new RestRequest($"/api/v3/coins/{TokenID}/market_chart?vs_currency={currency}&days={Days}&precision=8");
+            //var client = new RestClient("https://api.coingecko.com");
+            //var request = new RestRequest($"/api/v3/coins/{TokenID}/market_chart?vs_currency={currency}&days={Days}&precision=8");
+            var options = new RestClientOptions($"https://api.coingecko.com/api/v3/coins/{TokenID}/market_chart?vs_currency={currency}&days={Days}&precision=8");
+            var client = new RestClient(options);
+            var request = new RestRequest("");
+            request.AddHeader("x-cg-demo-api-key", Properties.Settings.Default.APIKeyCoinGecko);
+            var response = await client.GetAsync(request);
 
-            var response = await client.ExecuteAsync(request);
             var series = new XyDataSeries<DateTime, double>();
 
             if (response.IsSuccessful)
@@ -308,6 +320,67 @@ namespace CryptoWPFX.Model.API
             public double LastPrice { get; set; }
             public string Name { get; set; }
             public string TradeURL { get; set; }
+        }
+
+        public static async Task<Coin[]> GetTokensInfoToIDs(List<string> TokensID)
+        {
+            string tokens = "";
+            foreach (string token in TokensID)
+            {
+                tokens = tokens + "%2C%20" + token;
+            }
+            tokens = tokens.Substring(6);   
+            var options = new RestClientOptions($"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids={tokens}&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=1h%2C24h%2C7d%2C14d%2C30d%2C90d%2C1y&locale=en&precision=8");
+            var client = new RestClient(options);
+            var request = new RestRequest("");
+            request.AddHeader("x-cg-demo-api-key", "CG-pibZCCfRXjV16buMmrrk16SU");
+            var response = await client.GetAsync(request);
+
+            Coin[] coins = JsonConvert.DeserializeObject<Coin[]>(response.Content);
+            return coins;
+        }
+
+        public class Coin
+        {
+            public string? Id { get; set; }
+            public string? Symbol { get; set; }
+            public string? Name { get; set; }
+            public string? Image { get; set; }
+            public double? current_price { get; set; }
+            public long? Market_Cap { get; set; }
+            public int? Market_Cap_Rank { get; set; }
+            public long? Fully_Diluted_Valuation { get; set; }
+            public long? Total_Volume { get; set; }
+            public double? High_24h { get; set; }
+            public double? Low_24h { get; set; }
+            public double? Price_Change_24h { get; set; }
+            public double? Price_Change_Percentage_24h { get; set; }
+            public long? Market_Cap_Change_24h { get; set; }
+            public double? Market_Cap_Change_Percentage_24h { get; set; }
+            public long? Circulating_Supply { get; set; }
+            public long? Total_Supply { get; set; }
+            public long? Max_Supply { get; set; }
+            public double Ath { get; set; }
+            public double? Ath_Change_Percentage { get; set; }
+            public DateTime? Ath_Date { get; set; }
+            public double? Atl { get; set; }
+            public double? Atl_Change_Percentage { get; set; }
+            public DateTime? Atl_Date { get; set; }
+            public object? Roi { get; set; }
+            public DateTime? Last_Updated { get; set; }
+            public double? price_change_percentage_14d_in_currency { get; set; }
+            public double? Price_Change_Percentage_1h_In_Currency { get; set; }
+            public double? Price_Change_Percentage_1y_In_Currency { get; set; }
+            public double? Price_Change_Percentage_24h_In_Currency { get; set; }
+            public double? Price_Change_Percentage_30d_In_Currency { get; set; }
+            public double? Price_Change_Percentage_7d_In_Currency { get; set; }
+
+            public SolidColorBrush colorPrice { get; set; }
+
+            public Coin()
+            {
+                colorPrice = Brushes.LimeGreen;
+            }
         }
     }
 }
