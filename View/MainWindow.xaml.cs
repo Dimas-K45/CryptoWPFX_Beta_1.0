@@ -215,7 +215,7 @@ namespace CryptoWPFX
             borderClickDataGrid.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E00AC"));
             borderClickDataGridMainPoolCrypto.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
             borderConverterCoin.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
-
+            //
             if (borderClickDataGrid.Child is FontAwesome.WPF.ImageAwesome font && borderClickDataGridMainPoolCrypto.Child is FontAwesome.WPF.ImageAwesome font2 && borderConverterCoin.Child is FontAwesome.WPF.ImageAwesome font3)
             {
                 font.Foreground = Brushes.White;
