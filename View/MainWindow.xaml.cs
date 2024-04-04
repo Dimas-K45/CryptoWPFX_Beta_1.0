@@ -3,7 +3,13 @@ using CryptoWPFX.Model;
 using CryptoWPFX.Model.API;
 using SciChart.Charting.Model.DataSeries;
 using SciChart.Core.Extensions;
+
 using System.Diagnostics;
+
+using System.Numerics;
+using System.Reflection.Emit;
+using System.Text;
+
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Automation;
@@ -16,7 +22,7 @@ using static CryptoWPFX.Model.API.CoinGeckoApi;
 
 namespace CryptoWPFX
 {
-    
+
     public partial class MainWindow : Window
     {
         SQLiteDB SQL = new SQLiteDB();
@@ -24,12 +30,19 @@ namespace CryptoWPFX
         string TokenActiveID = "";
         private CoinGeckoApi coinGeckoAPI = new CoinGeckoApi();
         private List<CryptoCurrency> topCurrencies = new List<CryptoCurrency>();
+
         List<Coin> ListFavoritesCrypto = new List<Coin>();
 
         JsonElement ConvertCurrencyToken;
+
+        public CryptoCurrency CryptoCurrency { get; private set; }
+        ApplicationContext db = new ApplicationContext();
+
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = CryptoCurrency;
+            Loaded += Window_Loaded;
         }
         static string InsertSeparator(string input)
         {
@@ -102,13 +115,22 @@ namespace CryptoWPFX
             }
         }
 
+
         // загрузка списка криптовалют на главной странице
+
+        private void ScrennHide_Click(object sender, MouseButtonEventArgs e)
+        {
+            Application.Current.MainWindow.WindowState = WindowState.Minimized;
+        }
+
+
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             try
             {
                 // Получаем список топ N криптовалют
                 topCurrencies = await coinGeckoAPI.GetTopNCurrenciesAsync(500, 1);
+
                 foreach (CryptoCurrency currencies in topCurrencies)
                 {
                     if (currencies.price_change_percentage_24h <= 0)
@@ -133,6 +155,27 @@ namespace CryptoWPFX
                     ListFavoritesCrypto.Add(coin);
                 }
                 DataGridFavorites.ItemsSource = ListFavoritesCrypto;
+
+
+                // Привязываем к комбо-боксам
+                cmbFromCurrency.ItemsSource = topCurrencies;
+                cmbFromCurrency.DisplayMemberPath = "Symbol";
+                cmbToCurrency.ItemsSource = topCurrencies;
+                cmbToCurrency.DisplayMemberPath = "Symbol";
+
+                // Привязываем список к DataGrid
+                DataGrid.ItemsSource = topCurrencies;
+                db.Database.EnsureCreated();
+                foreach (var currency in topCurrencies)
+                {
+                    if (!db.CryptoCoin.Any(c => c.Id == currency.Id))
+                    {
+                        db.CryptoCoin.Add(currency);
+                    }
+                }
+                db.SaveChanges();
+
+
             }
             catch (Exception ex)
             {
@@ -212,6 +255,10 @@ namespace CryptoWPFX
             MainScrolCrypto.Visibility = Visibility.Visible;
             ScrolFavorites.Visibility = Visibility.Collapsed;
             ConverterCoin.Visibility = Visibility.Collapsed;
+
+            borderHeaderDataGrid.Visibility = Visibility.Visible;
+            borderCoinInput.Visibility = Visibility.Visible;
+
             borderClickDataGrid.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E00AC"));
             borderClickDataGridMainPoolCrypto.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
             borderConverterCoin.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
@@ -230,6 +277,10 @@ namespace CryptoWPFX
             MainScrolCrypto.Visibility = Visibility.Collapsed;
             ScrolFavorites.Visibility = Visibility.Visible;
             ConverterCoin.Visibility = Visibility.Collapsed;
+
+            borderHeaderDataGrid.Visibility = Visibility.Visible;
+            borderCoinInput.Visibility = Visibility.Visible;
+
             borderClickDataGrid.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
             borderClickDataGridMainPoolCrypto.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E00AC"));
             borderConverterCoin.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
@@ -248,6 +299,7 @@ namespace CryptoWPFX
             DataGridFavorites.Visibility = Visibility.Collapsed;
             ConverterCoin.Visibility = Visibility.Visible;
             borderHeaderDataGrid.Visibility = Visibility.Collapsed;
+            borderCoinInput.Visibility = Visibility.Collapsed;
             borderClickDataGrid.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
             borderClickDataGridMainPoolCrypto.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7163ba"));
             borderConverterCoin.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E00AC"));
@@ -589,6 +641,7 @@ namespace CryptoWPFX
             MessageBorder.Visibility = Visibility.Collapsed;
         }
 
+
         // поиск курса токена в других валютах (на странице с токеном)
         private void SearchCryptoConvert(object sender, TextChangedEventArgs e)
         {
@@ -870,6 +923,39 @@ namespace CryptoWPFX
                 border.Background = Brushes.Transparent;
             }
             
+
+        private async void btnConvert_Click(object sender, RoutedEventArgs e)
+        {
+            decimal amount;
+            if (!decimal.TryParse(txtAmount.Text, out amount))
+            {
+                MessageBox.Show("Invalid amount.");
+                return;
+            }
+
+            if (cmbFromCurrency.SelectedItem == null || cmbToCurrency.SelectedItem == null)
+            {
+                MessageBox.Show("Please select currencies.");
+                return;
+            }
+            CryptoCurrency fromCurrency = (CryptoCurrency)cmbFromCurrency.SelectedItem;
+            CryptoCurrency toCurrency = (CryptoCurrency)cmbToCurrency.SelectedItem;
+
+            CoinGeckoApi coinGeckoApi = new CoinGeckoApi();
+            decimal? fromCurrencyPrice = await coinGeckoApi.GetCurrencyPriceByIdAsync(fromCurrency.Id, "usd"); // Получить цену в USD
+            decimal? toCurrencyPrice = await coinGeckoApi.GetCurrencyPriceByIdAsync(toCurrency.Id, "usd"); // Получить цену в USD
+
+            if (fromCurrencyPrice.HasValue && toCurrencyPrice.HasValue)
+            {
+                // Преобразуем в OACurrency
+                decimal result = (amount / fromCurrencyPrice.Value) * toCurrencyPrice.Value;
+
+                lblResult.Text = $"Result: {result} {toCurrency.Symbol}";
+            }
+            else
+            {
+                MessageBox.Show("Failed to get exchange rate.");
+            }
         }
     }
 }
